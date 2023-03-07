@@ -1,4 +1,5 @@
-![Stubai Alps](/images/Ruderhofspitze.jpg?raw=true)
+<a>![Stubai Alps](/images/Ruderhofspitze.jpg?raw=true)</a>
+<sup><sub>I captured this stunning view in the Stubai Alps, Tyrol. The natural beauty of this scene is undeniable, but it's important to remember that nature can also be a source of danger. Snow avalanches are a frequent risk in this region, highlighting the need for caution and preparation in the mountains.</sup></sub>
 
 # LAWIS Data Analysis
 Welcome to my exploratory data science project on avalanche incidents in Europe! This project aims to retrieve information from LAWIS, an Open Government Data (OGD) database, and create compelling visualizations that provide insights into the occurrences and characteristics of avalanche accidents. 
