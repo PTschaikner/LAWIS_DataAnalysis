@@ -2,7 +2,7 @@
 
 var map = null;
 var zoomLevel = 8;
-var paris = new L.LatLng(47.259659, 11.400375);
+var innsbruck = new L.LatLng(47.259659, 11.400375);
 
 function showMap() {
   initMap();
@@ -12,7 +12,7 @@ function showMap() {
 function initMap() {
   var tileLayer = createTileLayer();
   var mapOptions = {
-    center: paris,
+    center: innsbruck,
     zoom: zoomLevel,
     layers: [tileLayer],
     dragging: false,   // disable map dragging
