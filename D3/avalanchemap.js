@@ -1,7 +1,8 @@
 
 
 var map = null;
-var zoomLevel = 8;
+var zoomLevel = 9;
+
 var innsbruck = new L.LatLng(47.259659, 11.400375);
 
 function showMap() {
@@ -48,7 +49,7 @@ function initMap() {
   }
   function addMarker(avalanche) {
     var strokeWidth = 0.5;
-    var colors = ['gray', 'red'];
+    var colors = ['gray', 'red', 'orange'];
     var radii = [2];
     var opacity = [0.4];
     
@@ -60,6 +61,9 @@ function initMap() {
     } else {
       radii[0] = 1.5;
       opacity[0] = 0.8;
+      if(avalanche.involved_injured > 0) {
+        colors[0] = 'orange';
+      }
     }
     
     // Add concentric circles for each death
@@ -70,7 +74,7 @@ function initMap() {
     
     var markerGroup = map.svg.append('g');
     for (var i = 0; i < radii.length; i++) {
-      var color = colors[Math.min(i, colors.length-1)];
+      var color = colors[Math.min(i, colors.length-2)];
       var radius = radii[i];
       var marker = markerGroup.append('circle')
         .attr('cx', map.latLngToLayerPoint([avalanche.location_latitude, avalanche.location_longitude]).x)
@@ -81,7 +85,7 @@ function initMap() {
         .style('stroke-width', strokeWidth)
         .style('opacity', 0)
         .transition()
-          .duration(500)
+          .duration(200)
           .attr('r', radius)
           .style('fill-opacity', opacity[i])
           .style('opacity', opacity[i]);
