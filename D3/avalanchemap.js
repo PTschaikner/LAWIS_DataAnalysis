@@ -18,7 +18,8 @@ function initMap() {
     dragging: false,   // disable map dragging
     touchZoom: false,  // disable touch zoom
     zoomControl: false, // disable zoom buttons
-    scrollWheelZoom: false
+    scrollWheelZoom: false,
+    doubleClickZoom: false
   };
   map = new L.Map('leaflet-map', mapOptions);
   
