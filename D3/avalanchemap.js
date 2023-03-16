@@ -37,7 +37,7 @@ function initMap() {
 
   function loadCSVData() {
     d3.csv("http://localhost:8000/avalanche_data.csv", function(data) {
-      var delay = 10; // delay in milliseconds between each marker
+      var delay = 20; // delay in milliseconds between each marker
       data.forEach(function (avalanche, i) {
         setTimeout(function() {
           addMarker(avalanche);
@@ -45,27 +45,46 @@ function initMap() {
       });
     });
   }
-  
   function addMarker(avalanche) {
-    var radius = 2;
-    var opacity = 0.4;
     var strokeWidth = 0.5;
-    var color = 'gray';
+    var colors = ['gray', 'red'];
+    var radii = [2];
+    var opacity = [0.4];
+    
+    // Check if there were any deaths
     if (avalanche.involved_dead > 0) {
-      color = 'red';
-      opacity = 0.8;
+      radii[0] = 2;
+      opacity[0] = 0.6;
+      colors[0] = 'red';
+    } else {
+      radii[0] = 1.5;
+      opacity[0] = 0.8;
     }
-    var marker = map.svg.append('circle')
-    .attr('cx', map.latLngToLayerPoint([avalanche.location_latitude, avalanche.location_longitude]).x)
-    .attr('cy', map.latLngToLayerPoint([avalanche.location_latitude, avalanche.location_longitude]).y)
-    .attr('r', 0)
-    .style('fill', color)
-    .style('stroke', 'black')
-    .style('stroke-width', strokeWidth)
-    .style('opacity', 0)
-    .transition()
-      .duration(500)
-      .attr('r', radius)
-      .style('opacity', opacity);
+    
+    // Add concentric circles for each death
+    for (var i = 0; i < avalanche.involved_dead; i++) {
+      radii.push(2 + (i+1)*2);
+      opacity.push(0.8);
+    }
+    
+    var markerGroup = map.svg.append('g');
+    for (var i = 0; i < radii.length; i++) {
+      var color = colors[Math.min(i, colors.length-1)];
+      var radius = radii[i];
+      var marker = markerGroup.append('circle')
+        .attr('cx', map.latLngToLayerPoint([avalanche.location_latitude, avalanche.location_longitude]).x)
+        .attr('cy', map.latLngToLayerPoint([avalanche.location_latitude, avalanche.location_longitude]).y)
+        .attr('r', radius)
+        .style('fill', i === 0 ? color : 'none')
+        .style('stroke', color)
+        .style('stroke-width', strokeWidth)
+        .style('opacity', 0)
+        .transition()
+          .duration(500)
+          .attr('r', radius)
+          .style('fill-opacity', opacity[i])
+          .style('opacity', opacity[i]);
+    }
   }
+  
   
