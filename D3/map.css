@@ -2,3 +2,7 @@
     width: 962px;
     height: 502px;
   }
+
+  .leaflet-container {
+    cursor: auto !important;
+  }
