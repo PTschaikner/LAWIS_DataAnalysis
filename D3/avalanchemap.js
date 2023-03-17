@@ -87,8 +87,8 @@ function loadCSVData() {
       
     // Delay the transition of each circle by the specified amount
     marker.transition()
-      .delay(delay + (i * 100))
-      .duration(1000)
+      .delay(delay + (i*20))
+      .duration(700)
       .attr('r', radius)
       .style('fill-opacity', opacity[i])
       .style('opacity', opacity[i]);
