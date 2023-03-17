@@ -37,59 +37,62 @@ function initMap() {
     return new L.TileLayer(tileSourceURL, tileSourceOptions);
   }
 
-  function loadCSVData() {
-    d3.csv("http://localhost:8000/avalanche_data.csv", function(data) {
-      var delay = 20; // delay in milliseconds between each marker
-      data.forEach(function (avalanche, i) {
-        setTimeout(function() {
-          addMarker(avalanche);
-        }, i * delay);
-      });
+function loadCSVData() {
+  d3.csv("http://localhost:8000/avalanche_data.csv", function(data) {
+    data.forEach(function (avalanche) {
+      addMarker(avalanche); // Add a delay based on the order of the avalanche in the CSV file
     });
-  }
+  });
+}
+
   function addMarker(avalanche) {
-    var strokeWidth = 0.5;
-    var colors = ['gray', 'red', 'orange'];
-    var radii = [2];
-    var opacity = [0.4];
-    
-    // Check if there were any deaths
-    if (avalanche.involved_dead > 0) {
-      radii[0] = 2;
-      opacity[0] = 0.6;
-      colors[0] = 'red';
-    } else {
-      radii[0] = 1.5;
-      opacity[0] = 0.8;
-      if(avalanche.involved_injured > 0) {
-        colors[0] = 'orange';
-      }
-    }
-    
-    // Add concentric circles for each death
-    for (var i = 0; i < avalanche.involved_dead; i++) {
-      radii.push(2 + (i+1)*2);
-      opacity.push(0.8);
-    }
-    
-    var markerGroup = map.svg.append('g');
-    for (var i = 0; i < radii.length; i++) {
-      var color = colors[Math.min(i, colors.length-2)];
-      var radius = radii[i];
-      var marker = markerGroup.append('circle')
-        .attr('cx', map.latLngToLayerPoint([avalanche.location_latitude, avalanche.location_longitude]).x)
-        .attr('cy', map.latLngToLayerPoint([avalanche.location_latitude, avalanche.location_longitude]).y)
-        .attr('r', radius)
-        .style('fill', i === 0 ? color : 'none')
-        .style('stroke', color)
-        .style('stroke-width', strokeWidth)
-        .style('opacity', 0)
-        .transition()
-          .duration(200)
-          .attr('r', radius)
-          .style('fill-opacity', opacity[i])
-          .style('opacity', opacity[i]);
+  var delay = i * 20
+  var strokeWidth = 0.5;
+  var colors = ['gray', 'red', 'orange'];
+  var radii = [2];
+  var opacity = [0.4];
+  
+  // Check if there were any deaths
+  if (avalanche.involved_dead > 0) {
+    radii[0] = 2;
+    opacity[0] = 0.6;
+    colors[0] = 'red';
+  } else {
+    radii[0] = 1.5;
+    opacity[0] = 0.8;
+    if(avalanche.involved_injured > 0) {
+      colors[0] = 'orange';
     }
   }
+  
+  // Add concentric circles for each death
+  for (var i = 0; i < avalanche.involved_dead; i++) {
+    radii.push(2 + (i+1)*2);
+    opacity.push(0.8);
+  }
+  
+  var markerGroup = map.svg.append('g');
+  var color, radius, marker;
+  for (var i = 0; i < radii.length; i++) {
+    color = colors[Math.min(i, colors.length-2)];
+    radius = radii[i];
+    marker = markerGroup.append('circle')
+      .attr('cx', map.latLngToLayerPoint([avalanche.location_latitude, avalanche.location_longitude]).x)
+      .attr('cy', map.latLngToLayerPoint([avalanche.location_latitude, avalanche.location_longitude]).y)
+      .attr('r', radius)
+      .style('fill', i === 0 ? color : 'none')
+      .style('stroke', color)
+      .style('stroke-width', strokeWidth)
+      .style('opacity', 0);
+      
+    // Delay the transition of each circle by the specified amount
+    marker.transition()
+      .delay(delay + (i * 100))
+      .duration(500)
+      .attr('r', radius)
+      .style('fill-opacity', opacity[i])
+      .style('opacity', opacity[i]);
+  }
+}
   
   
