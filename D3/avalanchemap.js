@@ -37,17 +37,16 @@ function initMap() {
     return new L.TileLayer(tileSourceURL, tileSourceOptions);
   }
 
-  function loadCSVData() {
-    d3.csv("http://localhost:8000/avalanche_data.csv", function(data) {
-      data.forEach(function (avalanche) {
-        addMarker(avalanche); // Add a delay based on the order of the avalanche in the CSV file
-      });
+function loadCSVData() {
+  d3.csv("http://localhost:8000/avalanche_data.csv", function(data) {
+    data.forEach(function (avalanche) {
+      addMarker(avalanche); // Add a delay based on the order of the avalanche in the CSV file
     });
-  }
-  
+  });
+}
 
-function addMarker(avalanche) {
-  var delay = avalanche.index
+  function addMarker(avalanche) {
+  var delay = i * 20
   var strokeWidth = 0.5;
   var colors = ['gray', 'red', 'orange'];
   var radii = [2];
@@ -95,3 +94,5 @@ function addMarker(avalanche) {
       .style('opacity', opacity[i]);
   }
 }
+  
+  
