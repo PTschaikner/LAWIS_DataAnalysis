@@ -38,7 +38,7 @@ function initMap() {
   }
 
 function loadCSVData() {
-  d3.csv("http://localhost:8000/avalanche_data.csv", function(data) {
+  d3.csv("avalanche_data.csv", function(data) {
     data.forEach(function (avalanche) {
       addMarker(avalanche); // Add a delay based on the order of the avalanche in the CSV file
     });
@@ -46,7 +46,7 @@ function loadCSVData() {
 }
 
   function addMarker(avalanche) {
-  var delay = i * 20
+  var delay = avalanche.index * 10
   var strokeWidth = 0.5;
   var colors = ['gray', 'red', 'orange'];
   var radii = [2];
@@ -88,7 +88,7 @@ function loadCSVData() {
     // Delay the transition of each circle by the specified amount
     marker.transition()
       .delay(delay + (i * 100))
-      .duration(500)
+      .duration(1000)
       .attr('r', radius)
       .style('fill-opacity', opacity[i])
       .style('opacity', opacity[i]);
