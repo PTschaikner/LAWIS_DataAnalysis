@@ -37,13 +37,13 @@ function initMap() {
     return new L.TileLayer(tileSourceURL, tileSourceOptions);
   }
 
-function loadCSVData() {
-  d3.csv("avalanche_data.csv", function(data) {
-    data.forEach(function (avalanche) {
-      addMarker(avalanche); 
-    });
-  });
-}
+  function loadCSVData() {
+    d3.csv("avalanche_data.csv").then(function(data) {
+        data.forEach(function (avalanche) {
+          addMarker(avalanche); 
+        });
+      });
+    }
 
   function addMarker(avalanche) {
   var delay = avalanche.index * 10
