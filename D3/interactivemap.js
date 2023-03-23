@@ -1,3 +1,4 @@
+// Declare global variables
 const map = null;
 const zoomLevel = 9;
 const innsbruck = new L.LatLng(47.259659, 11.400375);
@@ -13,11 +14,14 @@ const mapOptions = {
   doubleClickZoom: false
 };
 
+// Show the map and load data
 function showMap() {
   initMap();
   loadCSVData();
 }
 
+
+// Initialize the Leaflet map
 function initMap() {
   const tileLayer = createTileLayer();
   map = new L.Map('leaflet-map', mapOptions);
@@ -34,6 +38,7 @@ function createTileLayer() {
   return new L.TileLayer(tileSourceURL, tileSourceOptions);
 }
 
+// Load the CSV data and add markers to the map
 function loadCSVData() {
   d3.csv("avalanche_data.csv").then(addMarkers);
 }
@@ -41,9 +46,6 @@ function loadCSVData() {
 
 function addMarkers(data) {
   console.log(data);
-  // Get the danger rating levels in the data
-  var dangerLevels = ['low', 'moderate', 'considerable', 'high', 'very high', 'not assigned'];
-
   // Add checkboxes for each danger rating level
   d3.select('body')
     .selectAll('.checkbox')
@@ -75,9 +77,10 @@ function addMarkers(data) {
       .attr('opacity', opacity);
   }
 
+  // Define functions to calculate the radius of the circles
   function fatalRadius() { return 1 + d.involved_dead * 1.2 };
-  function injuredRadius() {return 1 + d.involved_injured * 1.2 };
-  function otherRadius() {return 1.5 };
+  function injuredRadius() { return 1 + d.involved_injured * 1.2 };
+  function otherRadius() { return 1.5 };
 
   // Add the SVG circles to the g groups
   createAvalancheMarker(fatalAvalancheGroup, 'circle.fatal', 'red', 0.5, fatalRadius);
@@ -85,7 +88,7 @@ function addMarkers(data) {
   createAvalancheMarker(otherAvalancheGroup, 'circle.other', 'gray', 0.6, otherRadius);
 
 
-
+  // Define function to update markers based on checkbox selection
   function updateMarkers() {
     console.log('Updating markers...');
 
@@ -111,7 +114,7 @@ function addMarkers(data) {
     }
 
     resetRadius(fatalAvalancheGroup, 'circle.fatal', fatalRadius);
-    resetRadius(injurredAvalancheGroup, 'circle.injured', injuredRadius);
+    resetRadius(injuredAvalancheGroup, 'circle.injured', injuredRadius);
     resetRadius(otherAvalancheGroup, 'circle.other', otherRadius);
 
   }
