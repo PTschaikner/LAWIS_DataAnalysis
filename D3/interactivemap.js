@@ -1,9 +1,17 @@
-
-
-var map = null;
-var zoomLevel = 9;
-
-var innsbruck = new L.LatLng(47.259659, 11.400375);
+const map = null;
+const zoomLevel = 9;
+const innsbruck = new L.LatLng(47.259659, 11.400375);
+const dangerLevels = ['low', 'moderate', 'considerable', 'high', 'very high', 'not assigned'];
+const mapOptions = {
+  center: innsbruck,
+  zoom: zoomLevel,
+  layers: [createTileLayer()],
+  dragging: false,
+  touchZoom: false,
+  zoomControl: false,
+  scrollWheelZoom: false,
+  doubleClickZoom: false
+};
 
 function showMap() {
   initMap();
@@ -11,40 +19,27 @@ function showMap() {
 }
 
 function initMap() {
-  var tileLayer = createTileLayer();
-  var mapOptions = {
-    center: innsbruck,
-    zoom: zoomLevel,
-    layers: [tileLayer],
-    dragging: false,   // disable map dragging
-    touchZoom: false,  // disable touch zoom
-    zoomControl: false, // disable zoom buttons
-    scrollWheelZoom: false,
-    doubleClickZoom: false
-  };
+  const tileLayer = createTileLayer();
   map = new L.Map('leaflet-map', mapOptions);
-
-  // Add SVG layer to map for d3 markers
+  map.addLayer(tileLayer);
   map._initPathRoot();
   map.svg = d3.select('#leaflet-map').select('svg');
 }
 
 function createTileLayer() {
-  var tileSourceURL = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}';
-  var tileSourceOptions = {
+  const tileSourceURL = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}';
+  const tileSourceOptions = {
     attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community'
   };
   return new L.TileLayer(tileSourceURL, tileSourceOptions);
 }
 
 function loadCSVData() {
-  d3.csv("avalanche_data.csv").then(function (data) {
-    addMarker(data);
-  })
+  d3.csv("avalanche_data.csv").then(addMarkers);
 }
 
 
-function addMarker(data) {
+function addMarkers(data) {
   console.log(data);
   // Get the danger rating levels in the data
   var dangerLevels = ['low', 'moderate', 'considerable', 'high', 'very high', 'not assigned'];
@@ -68,7 +63,7 @@ function addMarker(data) {
   var otherAvalancheGroup = d3.select('svg').append('g').attr('class', 'other-avalanche-group');
 
   // Create a helper function to create SVG circles
-  function createCircle(group, selector, color, opacity, radiusFn) {
+  function createAvalancheMarker(group, selector, color, opacity, radiusFn) {
     group.selectAll(selector)
       .data(data)
       .enter()
@@ -85,9 +80,9 @@ function addMarker(data) {
   function otherRadius() {return 1.5 };
 
   // Add the SVG circles to the g groups
-  createCircle(fatalAvalancheGroup, 'circle.fatal', 'red', 0.5, fatalRadius);
-  createCircle(injuredAvalancheGroup, 'circle.injured', 'orange', injuredRadius);
-  createCircle(otherAvalancheGroup, 'circle.other', 'gray', 0.6, otherRadius);
+  createAvalancheMarker(fatalAvalancheGroup, 'circle.fatal', 'red', 0.5, fatalRadius);
+  createAvalancheMarker(injuredAvalancheGroup, 'circle.injured', 'orange', injuredRadius);
+  createAvalancheMarker(otherAvalancheGroup, 'circle.other', 'gray', 0.6, otherRadius);
 
 
 
