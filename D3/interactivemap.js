@@ -62,17 +62,42 @@ function addMarker(data) {
     .property('checked', true)
     .on('change', updateMarkers);
 
-  // Add all the markers initially
+  // Add the markers to the correct g groups
+  var fatalAvalancheGroup = d3.select('svg').append('g').attr('class', 'fatal-avalanche-group');
+  var injuredAvalancheGroup = d3.select('svg').append('g').attr('class', 'injured-avalanche-group');
+  var otherAvalancheGroup = d3.select('svg').append('g').attr('class', 'other-avalanche-group');
+
   var markers = map.svg.selectAll('circle')
     .data(data)
     .enter()
     .append('circle')
     .attr('cx', function (d) { return map.latLngToLayerPoint([d.location_latitude, d.location_longitude]).x; })
     .attr('cy', function (d) { return map.latLngToLayerPoint([d.location_latitude, d.location_longitude]).y; })
-    .attr('r', function (d) { return d.involved_dead; })
+    .each(function(d) {
+        if (d.involved_dead > 0) {
+            fatalAvalancheGroup.node().appendChild(this);
+        } else if (d.involved_injured > 0) {
+            injuredAvalancheGroup.node().appendChild(this);
+        } else {
+            otherAvalancheGroup.node().appendChild(this);
+        }
+    });
+
+    fatalAvalancheGroup.selectAll('circle')
+    .attr('r', function (d) { return 1 + d.involved_dead * 1.2;})
     .attr('fill', 'red')
-    .attr('opacity', 0.5)
-}
+    .attr('opacity', 0.5);
+
+    injuredAvalancheGroup.selectAll('circle')
+    .attr('r', function (d) {  return 1 + d.involved_injured * 1.2;})
+    .attr('fill', 'orange')
+    .attr('opacity', 0.5);
+
+    otherAvalancheGroup.selectAll('circle')
+    .attr('r', 1.5)
+    .attr('fill', 'gray')
+    .attr('opacity', 0.6);
+
 
 function updateMarkers() {
   console.log('Updating markers...');
@@ -90,9 +115,28 @@ function updateMarkers() {
     .attr('r', 0);
 
   // Update the markers that should be shown
-  map.svg.selectAll('circle')
+  fatalAvalancheGroup.selectAll('circle')
     .filter(d => checkedLevels.includes(d.danger_rating_text))
     .transition()
     .duration(500)
-    .attr('r', function (d) { return d.involved_dead; });
+    .attr('r', function (d) { return 1 + d.involved_dead * 1.2;})
+    .attr('fill', 'red')
+    .attr('opacity', 0.5);
+
+    injuredAvalancheGroup.selectAll('circle')
+    .filter(d => checkedLevels.includes(d.danger_rating_text))
+    .transition()
+    .duration(500)
+    .attr('r', function (d) {  return 1 + d.involved_injured * 1.2;})
+    .attr('fill', 'orange')
+    .attr('opacity', 0.5);
+
+    otherAvalancheGroup.selectAll('circle')
+    .filter(d => checkedLevels.includes(d.danger_rating_text))
+    .transition()
+    .duration(500)
+    .attr('r', 1.5)
+    .attr('fill', 'gray')
+    .attr('opacity', 0.6);
+}
 }
