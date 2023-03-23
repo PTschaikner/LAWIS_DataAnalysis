@@ -43,6 +43,7 @@ function loadCSVData() {
   })
 }
 
+
 function addMarker(data) {
   console.log(data);
   // Get the danger rating levels in the data
@@ -71,10 +72,7 @@ function addMarker(data) {
     .attr('r', function (d) { return d.involved_dead; })
     .attr('fill', 'red')
     .attr('opacity', 0.5)
-    .on('mouseover', function (d) { d3.select(this).attr('opacity', 1); })
-    .on('mouseout', function (d) { d3.select(this).attr('opacity', 0.5); })
-    .append('title')
-    .text(function (d) { return d.tooltip; });
+
 
 function updateMarkers() {
   console.log('Updating markers...');
