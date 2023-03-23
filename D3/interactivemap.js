@@ -67,76 +67,57 @@ function addMarker(data) {
   var injuredAvalancheGroup = d3.select('svg').append('g').attr('class', 'injured-avalanche-group');
   var otherAvalancheGroup = d3.select('svg').append('g').attr('class', 'other-avalanche-group');
 
-  var markers = map.svg.selectAll('circle')
-    .data(data)
-    .enter()
-    .append('circle')
-    .attr('cx', function (d) { return map.latLngToLayerPoint([d.location_latitude, d.location_longitude]).x; })
-    .attr('cy', function (d) { return map.latLngToLayerPoint([d.location_latitude, d.location_longitude]).y; })
-    .each(function(d) {
-        if (d.involved_dead > 0) {
-            fatalAvalancheGroup.node().appendChild(this);
-        } else if (d.involved_injured > 0) {
-            injuredAvalancheGroup.node().appendChild(this);
-        } else {
-            otherAvalancheGroup.node().appendChild(this);
-        }
-    });
+  // Create a helper function to create SVG circles
+  function createCircle(group, selector, color, opacity, radiusFn) {
+    group.selectAll(selector)
+      .data(data)
+      .enter()
+      .append('circle')
+      .attr('cx', function (d) { return map.latLngToLayerPoint([d.location_latitude, d.location_longitude]).x; })
+      .attr('cy', function (d) { return map.latLngToLayerPoint([d.location_latitude, d.location_longitude]).y; })
+      .attr('r', radiusFn)
+      .attr('fill', color)
+      .attr('opacity', opacity);
+  }
 
-    fatalAvalancheGroup.selectAll('circle')
-    .attr('r', function (d) { return 1 + d.involved_dead * 1.2;})
-    .attr('fill', 'red')
-    .attr('opacity', 0.5);
+  function fatalRadius() { return 1 + d.involved_dead * 1.2 };
+  function injuredRadius() {return 1 + d.involved_injured * 1.2 };
+  function otherRadius() {return 1.5 };
 
-    injuredAvalancheGroup.selectAll('circle')
-    .attr('r', function (d) {  return 1 + d.involved_injured * 1.2;})
-    .attr('fill', 'orange')
-    .attr('opacity', 0.5);
-
-    otherAvalancheGroup.selectAll('circle')
-    .attr('r', 1.5)
-    .attr('fill', 'gray')
-    .attr('opacity', 0.6);
+  // Add the SVG circles to the g groups
+  createCircle(fatalAvalancheGroup, 'circle.fatal', 'red', 0.5, fatalRadius);
+  createCircle(injuredAvalancheGroup, 'circle.injured', 'orange', injuredRadius);
+  createCircle(otherAvalancheGroup, 'circle.other', 'gray', 0.6, otherRadius);
 
 
-function updateMarkers() {
-  console.log('Updating markers...');
 
-  // Get the danger rating levels that are checked
-  var checkedLevels = d3.selectAll('input[type=checkbox]:checked').nodes().map(d => d.value);
-  console.log(checkedLevels);
+  function updateMarkers() {
+    console.log('Updating markers...');
+
+    // Get the danger rating levels that are checked
+    var checkedLevels = d3.selectAll('input[type=checkbox]:checked').nodes().map(d => d.value);
+    console.log(checkedLevels);
 
 
-  // Update the markers that should be hidden
-  map.svg.selectAll('circle')
-    .filter(d => !checkedLevels.includes(d.danger_rating_text))
-    .transition() // Add a transition to fade out the markers
-    .duration(500)
-    .attr('r', 0);
+    // Update the markers that should be hidden
+    map.svg.selectAll('circle')
+      .filter(d => !checkedLevels.includes(d.danger_rating_text))
+      .transition() // Add a transition to fade out the markers
+      .duration(500)
+      .attr('r', 0);
 
-  // Update the markers that should be shown
-  fatalAvalancheGroup.selectAll('circle')
-    .filter(d => checkedLevels.includes(d.danger_rating_text))
-    .transition()
-    .duration(500)
-    .attr('r', function (d) { return 1 + d.involved_dead * 1.2;})
-    .attr('fill', 'red')
-    .attr('opacity', 0.5);
+    // Update the markers that should be shown
+    function resetRadius(group, selector, radiusFn) {
+      group.selectAll(selector)
+        .filter(d => checkedLevels.includes(d.danger_rating_text))
+        .transition()
+        .duration(500)
+        .attr('r', radiusFn)
+    }
 
-    injuredAvalancheGroup.selectAll('circle')
-    .filter(d => checkedLevels.includes(d.danger_rating_text))
-    .transition()
-    .duration(500)
-    .attr('r', function (d) {  return 1 + d.involved_injured * 1.2;})
-    .attr('fill', 'orange')
-    .attr('opacity', 0.5);
+    resetRadius(fatalAvalancheGroup, 'circle.fatal', fatalRadius);
+    resetRadius(injurredAvalancheGroup, 'circle.injured', injuredRadius);
+    resetRadius(otherAvalancheGroup, 'circle.other', otherRadius);
 
-    otherAvalancheGroup.selectAll('circle')
-    .filter(d => checkedLevels.includes(d.danger_rating_text))
-    .transition()
-    .duration(500)
-    .attr('r', 1.5)
-    .attr('fill', 'gray')
-    .attr('opacity', 0.6);
-}
+  }
 }
