@@ -72,7 +72,7 @@ function addMarker(data) {
     .attr('r', function (d) { return d.involved_dead; })
     .attr('fill', 'red')
     .attr('opacity', 0.5)
-
+}
 
 function updateMarkers() {
   console.log('Updating markers...');
@@ -95,5 +95,4 @@ function updateMarkers() {
     .transition()
     .duration(500)
     .attr('r', function (d) { return d.involved_dead; });
-}
 }
