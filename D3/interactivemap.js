@@ -4,6 +4,7 @@ var map = null;
 var zoomLevel = 9;
 
 var innsbruck = new L.LatLng(47.259659, 11.400375);
+var dangerLevels = ['low', 'moderate', 'considerable', 'high', 'very high', 'not assigned'];
 
 function showMap() {
   initMap();
@@ -48,7 +49,7 @@ function loadCSVData() {
 function addMarker(data) {
   console.log(data);
   // Get the danger rating levels in the data
-  var dangerLevels = ['low', 'moderate', 'considerable', 'high', 'very high', 'not assigned'];
+
 
   // Add checkboxes for each danger rating level
   d3.select('body')
@@ -69,34 +70,34 @@ function addMarker(data) {
   var otherAvalancheGroup = d3.select('svg').append('g').attr('class', 'other-avalanche-group');
 
   var markers = map.svg.selectAll('circle')
-      .data(data)
-      .enter()
-      .append('circle')
-      .attr('cx', function (d) { return map.latLngToLayerPoint([d.location_latitude, d.location_longitude]).x; })
-      .attr('cy', function (d) { return map.latLngToLayerPoint([d.location_latitude, d.location_longitude]).y; })
-    .each(function(d) {
-        if (d.involved_dead > 0) {
-            fatalAvalancheGroup.node().appendChild(this);
-        } else if (d.involved_injured > 0) {
-            injuredAvalancheGroup.node().appendChild(this);
-        } else {
-            otherAvalancheGroup.node().appendChild(this);
-  }
+    .data(data)
+    .enter()
+    .append('circle')
+    .attr('cx', function (d) { return map.latLngToLayerPoint([d.location_latitude, d.location_longitude]).x; })
+    .attr('cy', function (d) { return map.latLngToLayerPoint([d.location_latitude, d.location_longitude]).y; })
+    .each(function (d) {
+      if (d.involved_dead > 0) {
+        fatalAvalancheGroup.node().appendChild(this);
+      } else if (d.involved_injured > 0) {
+        injuredAvalancheGroup.node().appendChild(this);
+      } else {
+        otherAvalancheGroup.node().appendChild(this);
+      }
     });
 
-    function setMarkerAttributes(group, fill, opacity, radiusFn) {
-      group.selectAll('circle')
-          .attr('fill', fill)
-          .attr('opacity', opacity)
-          .transition() // Add a transition to fade out the markers
-          .duration(2000)
-          .attr('r', radiusFn);
+  function setMarkerAttributes(group, fill, opacity, radiusFn) {
+    group.selectAll('circle')
+      .attr('fill', fill)
+      .attr('opacity', opacity)
+      .transition() // Add a transition to fade out the markers
+      .duration(2000)
+      .attr('r', radiusFn);
   }
-  
-  
+
+
   function fatalRadius(d) { return 1 + d.involved_dead * 1.2 };
-  function injuredRadius(d) {return 1 + d.involved_injured * 1.2 };
-  function otherRadius(d) {return 1.5 };
+  function injuredRadius(d) { return 1 + d.involved_injured * 1.2 };
+  function otherRadius(d) { return 1.5 };
 
   setMarkerAttributes(fatalAvalancheGroup, 'red', 0.5, fatalRadius);
   setMarkerAttributes(injuredAvalancheGroup, 'orange', 0.5, injuredRadius);
@@ -120,28 +121,16 @@ function addMarker(data) {
       .attr('r', 0);
 
     // Update the markers that should be shown
-  fatalAvalancheGroup.selectAll('circle')
+    function resetRadius(group, radiusFn) {
+      group.selectAll('circle')
         .filter(d => checkedLevels.includes(d.danger_rating_text))
         .transition()
         .duration(500)
-    .attr('r', function (d) { return 1 + d.involved_dead * 1.2;})
-    .attr('fill', 'red')
-    .attr('opacity', 0.5);
+        .attr('r', radiusFn);
+    }
 
-    injuredAvalancheGroup.selectAll('circle')
-    .filter(d => checkedLevels.includes(d.danger_rating_text))
-    .transition()
-    .duration(500)
-    .attr('r', function (d) {  return 1 + d.involved_injured * 1.2;})
-    .attr('fill', 'orange')
-    .attr('opacity', 0.5);
-
-    otherAvalancheGroup.selectAll('circle')
-    .filter(d => checkedLevels.includes(d.danger_rating_text))
-    .transition()
-    .duration(500)
-    .attr('r', 1.5)
-    .attr('fill', 'gray')
-    .attr('opacity', 0.6);
+    resetRadius(fatalAvalancheGroup, fatalRadius);
+    resetRadius(injuredAvalancheGroup, injuredRadius);
+    resetRadius(otherAvalancheGroup, otherRadius);
   }
 }
