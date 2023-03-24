@@ -6,6 +6,7 @@ const dangerLevels = ['low', 'moderate', 'considerable', 'high', 'very high', 'n
 let fatalAvalancheGroup = null;
 let injuredAvalancheGroup = null;
 let otherAvalancheGroup = null;
+let checkedLevels = null;
 
 // Create the map and load the data
 function showMap() {
@@ -121,7 +122,7 @@ function resetRadius(group, radiusFn) {
 }
 function updateMarkers() {
    // Get the danger rating levels that are checked
-   var checkedLevels = d3.selectAll('input[type=checkbox]:checked').nodes().map(d => d.value);
+   checkedLevels = d3.selectAll('input[type=checkbox]:checked').nodes().map(d => d.value);
 
   // Update the markers that should be hidden
   map.svg.selectAll('circle')
