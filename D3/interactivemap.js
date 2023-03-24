@@ -37,6 +37,7 @@ function createTileLayer() {
   return new L.TileLayer(tileSourceURL, tileSourceOptions);
 }
 
+// Load the CSV data and add markers to the map
 function loadCSVData() {
   d3.csv("avalanche_data.csv").then(function (data) {
     addMarker(data);
@@ -68,11 +69,11 @@ function addMarker(data) {
   var otherAvalancheGroup = d3.select('svg').append('g').attr('class', 'other-avalanche-group');
 
   var markers = map.svg.selectAll('circle')
-    .data(data)
-    .enter()
-    .append('circle')
-    .attr('cx', function (d) { return map.latLngToLayerPoint([d.location_latitude, d.location_longitude]).x; })
-    .attr('cy', function (d) { return map.latLngToLayerPoint([d.location_latitude, d.location_longitude]).y; })
+      .data(data)
+      .enter()
+      .append('circle')
+      .attr('cx', function (d) { return map.latLngToLayerPoint([d.location_latitude, d.location_longitude]).x; })
+      .attr('cy', function (d) { return map.latLngToLayerPoint([d.location_latitude, d.location_longitude]).y; })
     .each(function(d) {
         if (d.involved_dead > 0) {
             fatalAvalancheGroup.node().appendChild(this);
@@ -80,7 +81,7 @@ function addMarker(data) {
             injuredAvalancheGroup.node().appendChild(this);
         } else {
             otherAvalancheGroup.node().appendChild(this);
-        }
+  }
     });
 
     function setMarkerAttributes(group, fill, opacity, radiusFn) {
@@ -102,26 +103,27 @@ function addMarker(data) {
   setMarkerAttributes(otherAvalancheGroup, 'gray', 0.6, otherRadius);
 
 
-function updateMarkers() {
-  console.log('Updating markers...');
+  // Define function to update markers based on checkbox selection
+  function updateMarkers() {
+    console.log('Updating markers...');
 
-  // Get the danger rating levels that are checked
-  var checkedLevels = d3.selectAll('input[type=checkbox]:checked').nodes().map(d => d.value);
-  console.log(checkedLevels);
+    // Get the danger rating levels that are checked
+    var checkedLevels = d3.selectAll('input[type=checkbox]:checked').nodes().map(d => d.value);
+    console.log(checkedLevels);
 
 
-  // Update the markers that should be hidden
-  map.svg.selectAll('circle')
-    .filter(d => !checkedLevels.includes(d.danger_rating_text))
-    .transition() // Add a transition to fade out the markers
-    .duration(500)
-    .attr('r', 0);
+    // Update the markers that should be hidden
+    map.svg.selectAll('circle')
+      .filter(d => !checkedLevels.includes(d.danger_rating_text))
+      .transition() // Add a transition to fade out the markers
+      .duration(500)
+      .attr('r', 0);
 
-  // Update the markers that should be shown
+    // Update the markers that should be shown
   fatalAvalancheGroup.selectAll('circle')
-    .filter(d => checkedLevels.includes(d.danger_rating_text))
-    .transition()
-    .duration(500)
+        .filter(d => checkedLevels.includes(d.danger_rating_text))
+        .transition()
+        .duration(500)
     .attr('r', function (d) { return 1 + d.involved_dead * 1.2;})
     .attr('fill', 'red')
     .attr('opacity', 0.5);
@@ -141,5 +143,5 @@ function updateMarkers() {
     .attr('r', 1.5)
     .attr('fill', 'gray')
     .attr('opacity', 0.6);
-}
+  }
 }
