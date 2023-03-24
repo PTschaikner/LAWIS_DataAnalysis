@@ -2,7 +2,7 @@
 let map = null;
 const zoomLevel = 9;
 const innsbruck = new L.LatLng(47.259659, 11.400375);
-constdangerLevels = ['low', 'moderate', 'considerable', 'high', 'very high', 'not assigned'];
+const dangerLevels = ['low', 'moderate', 'considerable', 'high', 'very high', 'not assigned'];
 let fatalAvalancheGroup = null;
 let injuredAvalancheGroup = null;
 let otherAvalancheGroup = null;
@@ -120,6 +120,9 @@ function resetRadius(group, radiusFn) {
     .attr('r', radiusFn);
 }
 function updateMarkers() {
+   // Get the danger rating levels that are checked
+   var checkedLevels = d3.selectAll('input[type=checkbox]:checked').nodes().map(d => d.value);
+
   // Update the markers that should be hidden
   map.svg.selectAll('circle')
     .filter(d => !checkedLevels.includes(d.danger_rating_text))
