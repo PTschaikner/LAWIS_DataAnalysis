@@ -83,20 +83,23 @@ function addMarker(data) {
         }
     });
 
-    fatalAvalancheGroup.selectAll('circle')
-    .attr('r', function (d) { return 1 + d.involved_dead * 1.2;})
-    .attr('fill', 'red')
-    .attr('opacity', 0.5);
+    function setMarkerAttributes(group, fill, opacity, radiusFn) {
+      group.selectAll('circle')
+          .attr('fill', fill)
+          .attr('opacity', opacity)
+          .transition() // Add a transition to fade out the markers
+          .duration(2000)
+          .attr('r', radiusFn);
+  }
+  
+  
+  function fatalRadius(d) { return 1 + d.involved_dead * 1.2 };
+  function injuredRadius(d) {return 1 + d.involved_injured * 1.2 };
+  function otherRadius(d) {return 1.5 };
 
-    injuredAvalancheGroup.selectAll('circle')
-    .attr('r', function (d) {  return 1 + d.involved_injured * 1.2;})
-    .attr('fill', 'orange')
-    .attr('opacity', 0.5);
-
-    otherAvalancheGroup.selectAll('circle')
-    .attr('r', 1.5)
-    .attr('fill', 'gray')
-    .attr('opacity', 0.6);
+  setMarkerAttributes(fatalAvalancheGroup, 'red', 0.5, fatalRadius);
+  setMarkerAttributes(injuredAvalancheGroup, 'orange', 0.5, injuredRadius);
+  setMarkerAttributes(otherAvalancheGroup, 'gray', 0.6, otherRadius);
 
 
 function updateMarkers() {
