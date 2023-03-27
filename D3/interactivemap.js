@@ -92,10 +92,10 @@ function addMarker(data) {
   // create arc generator 
   var arcGen = d3.arc()
     .innerRadius(function (d) {
-      return (d.involved_injured * 1.2); // Set the outer radius dynamically based on d.involved_injured
+      return (3+d.involved_injured * 1.2); // Set the outer radius dynamically based on d.involved_injured
     })
     .outerRadius(function (d) {
-      return (d.involved_harmed * 1.2); // Set the outer radius dynamically based on d.involved_injured
+      return (3+d.involved_harmed * 1.2); // Set the outer radius dynamically based on d.involved_injured
     })
     .startAngle(0)
     .endAngle(2 * Math.PI);
@@ -105,14 +105,13 @@ function addMarker(data) {
     .data(data)
     .enter()
     .append("path")
-    .attr("d", arcGen)
-    .attr("fill", "pink")
-    .attr("stroke", "gray")
-    .attr("stroke-width", 1)
     .attr('transform', function (d) {
       const point = map.latLngToLayerPoint([d.location_latitude, d.location_longitude]);
       return `translate(${point.x}, ${point.y})`;
-    });
+    })
+    .attr("d", arcGen)
+    .attr("fill", "red")
+    .attr("opacity", 0.5);
 
 
   // set marker attributes for each Group
