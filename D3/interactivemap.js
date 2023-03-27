@@ -89,22 +89,31 @@ function addMarker(data) {
   injuredAvalancheGroup = d3.select('svg').append('g').attr('class', 'injured-avalanche-group');
   otherAvalancheGroup = d3.select('svg').append('g').attr('class', 'other-avalanche-group');
 
+
+  var arcGen = d3.arc()
+  .innerRadius(function(d) {
+    return (d.involved_injured * 1.2); // Set the outer radius dynamically based on d.involved_injured
+  })
+  .outerRadius(function(d) {
+    return (d.involved_harmed * 1.2); // Set the outer radius dynamically based on d.involved_injured
+  })
+  .startAngle(0)
+  .endAngle(2*Math.PI);
+
   // Add the markers to the correct g groups without stlyling
-  map.svg.selectAll('circle')
+  map.svg.selectAll('path')
     .data(data)
     .enter()
-    .append('circle')
-    .attr('cx', function (d) { return map.latLngToLayerPoint([d.location_latitude, d.location_longitude]).x; })
-    .attr('cy', function (d) { return map.latLngToLayerPoint([d.location_latitude, d.location_longitude]).y; })
-    .each(function (d) {
-      if (d.involved_dead > 0) {
-        fatalAvalancheGroup.node().appendChild(this);
-      } else if (d.involved_injured > 0) {
-        injuredAvalancheGroup.node().appendChild(this);
-      } else {
-        otherAvalancheGroup.node().appendChild(this);
-      }
+    .append("path")
+    .attr("d", arcGen)
+    .attr("fill", "pink")
+    .attr("stroke", "gray")
+    .attr("stroke-width", 1)
+    .attr('transform', function(d) {
+      const point = map.latLngToLayerPoint([d.location_latitude, d.location_longitude]);
+      return `translate(${point.x}, ${point.y})`;
     });
+
 
   // set marker attributes for each Group
   setMarkerAttributes(fatalAvalancheGroup, 'red', 0.5, fatalRadius);
