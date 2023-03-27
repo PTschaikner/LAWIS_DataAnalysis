@@ -89,16 +89,16 @@ function addMarker(data) {
   injuredAvalancheGroup = d3.select('svg').append('g').attr('class', 'injured-avalanche-group');
   otherAvalancheGroup = d3.select('svg').append('g').attr('class', 'other-avalanche-group');
 
-
+  // create arc generator 
   var arcGen = d3.arc()
-  .innerRadius(function(d) {
-    return (d.involved_injured * 1.2); // Set the outer radius dynamically based on d.involved_injured
-  })
-  .outerRadius(function(d) {
-    return (d.involved_harmed * 1.2); // Set the outer radius dynamically based on d.involved_injured
-  })
-  .startAngle(0)
-  .endAngle(2*Math.PI);
+    .innerRadius(function (d) {
+      return (d.involved_injured * 1.2); // Set the outer radius dynamically based on d.involved_injured
+    })
+    .outerRadius(function (d) {
+      return (d.involved_harmed * 1.2); // Set the outer radius dynamically based on d.involved_injured
+    })
+    .startAngle(0)
+    .endAngle(2 * Math.PI);
 
   // Add the markers to the correct g groups without stlyling
   map.svg.selectAll('path')
@@ -109,7 +109,7 @@ function addMarker(data) {
     .attr("fill", "pink")
     .attr("stroke", "gray")
     .attr("stroke-width", 1)
-    .attr('transform', function(d) {
+    .attr('transform', function (d) {
       const point = map.latLngToLayerPoint([d.location_latitude, d.location_longitude]);
       return `translate(${point.x}, ${point.y})`;
     });
@@ -130,8 +130,8 @@ function resetRadius(group, radiusFn) {
     .attr('r', radiusFn);
 }
 function updateMarkers() {
-   // Get the danger rating levels that are checked
-   checkedLevels = d3.selectAll('input[type=checkbox]:checked').nodes().map(d => d.value);
+  // Get the danger rating levels that are checked
+  checkedLevels = d3.selectAll('input[type=checkbox]:checked').nodes().map(d => d.value);
 
   // Update the markers that should be hidden
   map.svg.selectAll('circle')
