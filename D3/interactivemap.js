@@ -45,9 +45,60 @@ function createTileLayer() {
 // Load the CSV data and call the add markers function
 function loadCSVData() {
   d3.csv("avalanche_data.csv").then(function (data) {
+    addHistogram(data);
     addMarker(data);
   })
 }
+
+function addHistogram(data) {
+  const histogramDiv = d3.select('#histogram');
+  const width = histogramDiv.node().getBoundingClientRect().width;
+  const height = histogramDiv.node().getBoundingClientRect().height;
+  const margin = { top: 20, right: 20, bottom: 50, left: 20 };
+  const chartWidth = width - margin.left - margin.right;
+  const chartHeight = height - margin.top - margin.bottom;
+
+  // Create the SVG element with margins
+  const svgHist = histogramDiv.append('svg')
+    .attr('width', width)
+    .attr('height', height)
+    .append('g')
+    .attr('transform', `translate(${margin.left}, ${margin.top})`);
+
+  // Create x and y scales
+  const xScale = d3.scaleLinear()
+    .domain([1, 365])
+    .range([0, chartWidth]);
+  const yScale = d3.scaleLinear()
+    .domain([0, 70])
+    .range([chartHeight, 0]);
+
+  // Create x and y axes
+  const xAxis = d3.axisBottom(xScale);
+  const yAxis = d3.axisLeft(yScale);
+
+  // Add the x axis to the bottom of the chart
+  svgHist.append('g')
+    .attr('transform', `translate(0, ${chartHeight})`)
+    .call(xAxis);
+
+  // Add the y axis to the left of the chart
+  svgHist.append('g')
+    .call(yAxis);
+
+  // Create a selection of circles for each avalanche
+  const circles = svgHist.selectAll('circle')
+    .data(data)
+    .enter()
+    .append('circle')
+    .attr('cx', d => xScale(d.day_of_year))
+    .attr('cy', d => yScale(d.daycount))
+    .attr('r', 5)
+    .style('fill', d => d.involved_dead > 0 ? 'red' : d.involved_injured > 0 ? 'orange' : 'gray')
+    .style('opacity', 0.5);
+}
+
+
 
 // Add the Checkboxes, later do this in HTML directly
 function addCheckboxes() {
@@ -85,9 +136,9 @@ function addMarker(data) {
   addCheckboxes();
 
   // Add the markers to the correct g groups
-  fatalAvalancheGroup = d3.select('svg').append('g').attr('class', 'fatal-avalanche-group');
-  injuredAvalancheGroup = d3.select('svg').append('g').attr('class', 'injured-avalanche-group');
-  otherAvalancheGroup = d3.select('svg').append('g').attr('class', 'other-avalanche-group');
+  const  fatalAvalancheGroup = map.svg.append('g').attr('class', 'fatal-avalanche-group');
+  const injuredAvalancheGroup = map.svg.append('g').attr('class', 'injured-avalanche-group');
+  const otherAvalancheGroup = map.svg.append('g').attr('class', 'other-avalanche-group');
 
   // Add the markers to the correct g groups without stlyling
   map.svg.selectAll('circle')
@@ -121,8 +172,8 @@ function resetRadius(group, radiusFn) {
     .attr('r', radiusFn);
 }
 function updateMarkers() {
-   // Get the danger rating levels that are checked
-   checkedLevels = d3.selectAll('input[type=checkbox]:checked').nodes().map(d => d.value);
+  // Get the danger rating levels that are checked
+  checkedLevels = d3.selectAll('input[type=checkbox]:checked').nodes().map(d => d.value);
 
   // Update the markers that should be hidden
   map.svg.selectAll('circle')
