@@ -68,7 +68,7 @@ function addHistogram(data) {
   const histogramDiv = d3.select('#histogram');
   const width = histogramDiv.node().getBoundingClientRect().width;
   const height = histogramDiv.node().getBoundingClientRect().height;
-  const margin = { top: 20, right: 20, bottom: 50, left: 20 };
+  const margin = { top: 50, right: 0, bottom: 5, left: 0 };
   const chartWidth = width - margin.left - margin.right;
   const chartHeight = height - margin.top - margin.bottom;
 
@@ -89,16 +89,19 @@ function addHistogram(data) {
 
   // Create x and y axes
   const xAxis = d3.axisBottom(xScale);
+  
   const yAxis = d3.axisLeft(yScale);
 
   // Add the x axis to the bottom of the chart
   svgHist.append('g')
     .attr('transform', `translate(0, ${chartHeight})`)
-    .call(xAxis);
+    .call(xAxis)
+    .style('display', 'none');
 
   // Add the y axis to the left of the chart
   svgHist.append('g')
-    .call(yAxis);
+    .call(yAxis)
+    .style('display', 'none');
 
   const monthRects = svgHist.selectAll('rect')
     .data(calendar)
@@ -111,17 +114,15 @@ function addHistogram(data) {
     .attr('fill', (d, i) => i % 2 === 0 ? 'gray' : 'lightgray')
     .style('opacity', 0.1);
 
-  const monthLabels = svgHist.selectAll('text')
+    const monthLabels = svgHist.selectAll('text')
     .data(calendar)
     .enter()
     .append('text')
-    .attr('x', d => xScale(d.start))
-    .attr('y', 65)
+    .attr('x', d => xScale(d.start + d.days / 2)) // position the label at the center of the month rectangle
+    .attr('y', 20) // offset the label from the top of the chart
     .text(d => d.month)
-    .attr('text-anchor', 'middle')
-    .attr("font-size", "12px")
-    .attr("fill", "black")
-    .style('opacity', 1)
+    .style('font-size', '16px')
+    .style("fill", "black");
 
 
   // Create a selection of circles for each avalanche
