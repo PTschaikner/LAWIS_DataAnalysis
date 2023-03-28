@@ -93,7 +93,7 @@ function addHistogram(data) {
     .append('circle')
     .attr('cx', d => xScale(d.day_of_year))
     .attr('cy', d => yScale(d.daycount))
-    .attr('r', 5)
+    .attr('r', 2)
     .style('fill', d => d.involved_dead > 0 ? 'red' : d.involved_injured > 0 ? 'orange' : 'gray')
     .style('opacity', 0.5);
 }
@@ -136,9 +136,9 @@ function addMarker(data) {
   addCheckboxes();
 
   // Add the markers to the correct g groups
-  const  fatalAvalancheGroup = map.svg.append('g').attr('class', 'fatal-avalanche-group');
-  const injuredAvalancheGroup = map.svg.append('g').attr('class', 'injured-avalanche-group');
-  const otherAvalancheGroup = map.svg.append('g').attr('class', 'other-avalanche-group');
+  fatalAvalancheGroup = map.svg.append('g').attr('class', 'fatal-avalanche-group');
+  injuredAvalancheGroup = map.svg.append('g').attr('class', 'injured-avalanche-group');
+  otherAvalancheGroup = map.svg.append('g').attr('class', 'other-avalanche-group');
 
   // Add the markers to the correct g groups without stlyling
   map.svg.selectAll('circle')
