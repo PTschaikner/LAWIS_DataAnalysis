@@ -7,6 +7,20 @@ let fatalAvalancheGroup = null;
 let injuredAvalancheGroup = null;
 let otherAvalancheGroup = null;
 let checkedLevels = null;
+const calendar = [
+  { month: 'July', days: 31, start: 1 },
+  { month: 'August', days: 31, start: 32 },
+  { month: 'September', days: 30, start: 63 },
+  { month: 'October', days: 31, start: 93 },
+  { month: 'November', days: 30, start: 124 },
+  { month: 'December', days: 31, start: 154 },
+  { month: 'January', days: 31, start: 185 },
+  { month: 'February', days: 28, start: 216 },
+  { month: 'March', days: 31, start: 244 },
+  { month: 'April', days: 30, start: 275 },
+  { month: 'May', days: 31, start: 305 },
+  { month: 'June', days: 30, start: 336 }
+]
 
 // Create the map and load the data
 function showMap() {
@@ -86,6 +100,30 @@ function addHistogram(data) {
   svgHist.append('g')
     .call(yAxis);
 
+  const monthRects = svgHist.selectAll('rect')
+    .data(calendar)
+    .enter()
+    .append('rect')
+    .attr('x', d => xScale(d.start))
+    .attr('y', 0)
+    .attr('width', d => xScale(d.start + d.days) - xScale(d.start))
+    .attr('height', chartHeight)
+    .attr('fill', (d, i) => i % 2 === 0 ? 'gray' : 'lightgray')
+    .style('opacity', 0.1);
+
+  const monthLabels = svgHist.selectAll('text')
+    .data(calendar)
+    .enter()
+    .append('text')
+    .attr('x', d => xScale(d.start))
+    .attr('y', 65)
+    .text(d => d.month)
+    .attr('text-anchor', 'middle')
+    .attr("font-size", "12px")
+    .attr("fill", "black")
+    .style('opacity', 1)
+
+
   // Create a selection of circles for each avalanche
   const circles = svgHist.selectAll('circle')
     .data(data)
@@ -93,7 +131,7 @@ function addHistogram(data) {
     .append('circle')
     .attr('cx', d => xScale(d.day_of_year))
     .attr('cy', d => yScale(d.daycount))
-    .attr('r', 2)
+    .attr('r', d => d.involved_dead > 0 ? 2.5 : d.involved_injured > 0 ? 2.5 : 2)
     .style('fill', d => d.involved_dead > 0 ? 'red' : d.involved_injured > 0 ? 'orange' : 'gray')
     .style('opacity', 0.5);
 }
