@@ -85,7 +85,7 @@ function loadCSVData() {
 
 function addHistogram(data) {
   var rollupData = d3.rollup(
-    data,
+    data.filter(d => checkedLevels.includes(d.danger_rating_text)),
     // Second argument is an array of reducer functions
     // In this case, we want to count the number of avalanches where involved_dead > 0
     // and involved_injured > 0 for each day_of_year
