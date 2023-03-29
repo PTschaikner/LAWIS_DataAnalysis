@@ -1,3 +1,12 @@
+let svgHist = null;
+let xScale = null;
+let yScale = null;
+let xAxis = null;
+let yAxis = null;
+let monthRects = null;
+let chartHeight = null;
+let chartWidth = null;
+
 // Define initial variables and constants
 let map = null;
 const zoomLevel = 9;
@@ -26,6 +35,7 @@ const calendar = [
 function showMap() {
   initMap();
   loadCSVData();
+  initHistogram();
 
   const checkboxes = document.querySelectorAll('input[name="danger-levels"]');
 
@@ -37,12 +47,13 @@ function showMap() {
   });
 
   checkboxes.forEach((checkbox) => {
-    checkbox.addEventListener('change', function() {
+    checkbox.addEventListener('change', function () {
       checkedLevels = Array.from(checkboxes)
         .filter((checkbox) => checkbox.checked)
         .map((checkbox) => checkbox.value);
       console.log(checkedLevels);
       updateMarkers();
+      updateHistogram();
     });
   });
 }
@@ -78,68 +89,37 @@ function createTileLayer() {
 // Load the CSV data and call the add markers function
 function loadCSVData() {
   d3.csv("avalanche_data.csv").then(function (data) {
-    addHistogram(data);
     addMarker(data);
   })
 }
 
-function addHistogram(data) {
-  var rollupData = d3.rollup(
-    data.filter(d => checkedLevels.includes(d.danger_rating_text)),
-    // Second argument is an array of reducer functions
-    // In this case, we want to count the number of avalanches where involved_dead > 0
-    // and involved_injured > 0 for each day_of_year
-    // So, we will use filter() and length properties to get the counts
-    d => [
-      d.length,
-      d.filter(d => d.involved_dead > 0).length,
-      d.filter(d => d.involved_dead == 0 && d.involved_injured > 0).length,
-      d.filter(d => d.involved_dead == 0 && d.involved_injured == 0).length,
-    ],
-    d => d.day_of_year
-  );
-
-
-  var daywiseData = Array.from(rollupData, d => ({
-    day_of_year: d[0],
-    count_all_avalanches: d[1][0],
-    count_deadly_avalanches: d[1][1],
-    count_harmful_avalanches: d[1][2],
-    count_other_avalanches: d[1][3]
-  }));
-
-
-
-
-  console.log(daywiseData);
-
-
-  const histogramDiv = d3.select('#histogram');
+function initHistogram(data) {
+  histogramDiv = d3.select('#histogram');
   const width = histogramDiv.node().getBoundingClientRect().width;
   const height = histogramDiv.node().getBoundingClientRect().height;
-  const margin = { top: 20, right: 0, bottom: 5, left: 0 };
-  const chartWidth = width - margin.left - margin.right;
-  const chartHeight = height - margin.top - margin.bottom;
+  margin = { top: 20, right: 0, bottom: 5, left: 0 };
+  chartWidth = width - margin.left - margin.right;
+  chartHeight = height - margin.top - margin.bottom;
 
   // Create the SVG element with margins
-  const svgHist = histogramDiv.append('svg')
+  svgHist = histogramDiv.append('svg')
     .attr('width', width)
     .attr('height', height)
     .append('g')
     .attr('transform', `translate(${margin.left}, ${margin.top})`);
 
   // Create x and y scales
-  const xScale = d3.scaleLinear()
+  xScale = d3.scaleLinear()
     .domain([1, 365])
     .range([0, chartWidth]);
-  const yScale = d3.scaleLinear()
+  yScale = d3.scaleLinear()
     .domain([0, 70])
     .range([chartHeight, 0]);
 
   // Create x and y axes
-  const xAxis = d3.axisBottom(xScale);
+  xAxis = d3.axisBottom(xScale);
 
-  const yAxis = d3.axisLeft(yScale);
+  yAxis = d3.axisLeft(yScale);
 
   // Add the x axis to the bottom of the chart
   svgHist.append('g')
@@ -152,7 +132,7 @@ function addHistogram(data) {
     .call(yAxis)
     .style('display', 'none');
 
-  const monthRects = svgHist.selectAll('.month-rect')
+  monthRects = svgHist.selectAll('.month-rect')
     .data(calendar)
     .enter()
     .append('rect')
@@ -163,28 +143,83 @@ function addHistogram(data) {
     .attr('fill', (d, i) => i % 2 === 0 ? 'gray' : 'lightgray')
     .style('opacity', 0.1);
 
-  function createBars(selection, data, className, color, yAccessor) {
-    selection.selectAll(`.${className}`)
-      .data(data)
-      .enter()
-      .append("rect")
-      .attr("class", className)
-      .attr("id", d => "rect-" + d.day_of_year)
-      .attr("x", d => xScale(d.day_of_year))
-      .attr("y", chartHeight) // set the initial y value to the bottom of the chart
-      .attr("width", xScale(2) - xScale(1))
-      .attr("fill", color)
-      .transition()
-      .duration(2000)
-      .attr("y", d => yScale(yAccessor(d))) // set the final y value to the top of the bar
-      .attr("height", d => chartHeight - yScale(yAccessor(d))); // calculate the height of the bar based on the y value
-  }
-
-  createBars(svgHist, daywiseData, "bar-rect-all", "gray", d => d.count_all_avalanches);
-  createBars(svgHist, daywiseData, "bar-rect-deadly", "red", d => d.count_deadly_avalanches + d.count_harmful_avalanches);
-  createBars(svgHist, daywiseData, "bar-rect-harmful", "orange", d => d.count_harmful_avalanches);
-
+  updateHistogram();
 }
+
+function updateHistogram() {
+  d3.csv("avalanche_data.csv").then(function (data) {
+    var rollupData = d3.rollup(
+      data.filter(d => checkedLevels.includes(d.danger_rating_text)),
+      // Second argument is an array of reducer functions
+      // In this case, we want to count the number of avalanches where involved_dead > 0
+      // and involved_injured > 0 for each day_of_year
+      // So, we will use filter() and length properties to get the counts
+      d => [
+        d.length,
+        d.filter(d => d.involved_dead > 0).length,
+        d.filter(d => d.involved_dead == 0 && d.involved_injured > 0).length,
+        d.filter(d => d.involved_dead == 0 && d.involved_injured == 0).length,
+      ],
+      d => d.day_of_year
+    );
+
+
+    var daywiseData = Array.from(rollupData, d => ({
+      day_of_year: d[0],
+      count_all_avalanches: d[1][0],
+      count_deadly_avalanches: d[1][1],
+      count_harmful_avalanches: d[1][2],
+      count_other_avalanches: d[1][3]
+    }));
+
+
+
+
+
+    // Create x and y scales
+    const xScale = d3.scaleLinear()
+      .domain([1, 365])
+      .range([0, chartWidth]);
+    const yScale = d3.scaleLinear()
+      .domain([0, 70])
+      .range([chartHeight, 0]);
+
+
+      function createBars(selection, data, color, yAccessor, className) {
+        selection.selectAll(`.${className}`)
+          .data(data)
+          .join(
+            enter => enter.append("rect")
+              .attr("class", className)
+              .attr("x", d => xScale(d.day_of_year))
+              .attr("y", chartHeight) // set the initial y value to the bottom of the chart
+              .attr("width", xScale(2) - xScale(1))
+              .attr("fill", color)
+              .transition()
+              .duration(2000)
+              .attr("y", d => yScale(yAccessor(d))) // set the final y value to the top of the bar
+              .attr("height", d => chartHeight - yScale(yAccessor(d))), // calculate the height of the bar based on the y value
+            update => update
+              .transition()
+              .duration(2000)
+              .attr("y", d => yScale(yAccessor(d)))
+              .attr("height", d => chartHeight - yScale(yAccessor(d))),
+            exit => exit
+            .transition()
+            .duration(1000)
+            .attr("y", chartHeight)
+            .attr("height", 0)
+            .remove()
+          );
+      }
+
+    createBars(svgHist, daywiseData, "gray", d => d.count_all_avalanches, "allAvalanches");
+    createBars(svgHist, daywiseData, "red", d => d.count_deadly_avalanches + d.count_harmful_avalanches, "deadlyAvalanches");
+    createBars(svgHist, daywiseData, "orange", d => d.count_harmful_avalanches, "harmfulAvalanches");
+  });
+}
+
+
 
 
 
