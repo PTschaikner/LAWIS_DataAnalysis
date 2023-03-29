@@ -6,7 +6,7 @@ const dangerLevels = ['low', 'moderate', 'considerable', 'high', 'very high', 'n
 let fatalAvalancheGroup = null;
 let injuredAvalancheGroup = null;
 let otherAvalancheGroup = null;
-let checkedLevels = null;
+let checkedLevels = [];
 const calendar = [
   { month: 'July', days: 31, start: 1 },
   { month: 'August', days: 31, start: 32 },
@@ -26,6 +26,25 @@ const calendar = [
 function showMap() {
   initMap();
   loadCSVData();
+
+  const checkboxes = document.querySelectorAll('input[name="danger-levels"]');
+
+  // add checked checkboxes to checkedLevels array
+  checkboxes.forEach((checkbox) => {
+    if (checkbox.checked) {
+      checkedLevels.push(checkbox.value);
+    }
+  });
+
+  checkboxes.forEach((checkbox) => {
+    checkbox.addEventListener('change', function() {
+      checkedLevels = Array.from(checkboxes)
+        .filter((checkbox) => checkbox.checked)
+        .map((checkbox) => checkbox.value);
+      console.log(checkedLevels);
+      updateMarkers();
+    });
+  });
 }
 
 // Initialize the map
@@ -169,21 +188,6 @@ function addHistogram(data) {
 
 
 
-// Add the Checkboxes, later do this in HTML directly
-function addCheckboxes() {
-  d3.select('body')
-    .selectAll('.checkbox')
-    .data(dangerLevels)
-    .enter()
-    .append('label')
-    .text(d => d)
-    .append('input')
-    .attr('type', 'checkbox')
-    .attr('value', d => d) // set the value attribute to the danger rating level
-    .property('checked', true)
-    .on('change', updateMarkers);
-}
-
 // helper functions to dynamically set the styling of each avalanche based on the Group
 function setMarkerAttributes(group, fill, opacity, radiusFn) {
   group.selectAll('circle')
@@ -201,8 +205,6 @@ function otherRadius(d) { return 1.5 };
 
 // Add the markers to the map
 function addMarker(data) {
-  // Add checkboxes for each danger rating level
-  addCheckboxes();
 
   // Add the markers to the correct g groups
   fatalAvalancheGroup = map.svg.append('g').attr('class', 'fatal-avalanche-group');
@@ -227,9 +229,10 @@ function addMarker(data) {
     });
 
   // set marker attributes for each Group
-  setMarkerAttributes(fatalAvalancheGroup, 'red', 0.5, fatalRadius);
-  setMarkerAttributes(injuredAvalancheGroup, 'orange', 0.5, injuredRadius);
-  setMarkerAttributes(otherAvalancheGroup, 'gray', 0.6, otherRadius);
+  setMarkerAttributes(fatalAvalancheGroup, 'red', 0.5, 0);
+  setMarkerAttributes(injuredAvalancheGroup, 'orange', 0.5, 0);
+  setMarkerAttributes(otherAvalancheGroup, 'gray', 0.6, 0);
+  updateMarkers();
 }
 
 
@@ -241,9 +244,6 @@ function resetRadius(group, radiusFn) {
     .attr('r', radiusFn);
 }
 function updateMarkers() {
-  // Get the danger rating levels that are checked
-  checkedLevels = d3.selectAll('input[type=checkbox]:checked').nodes().map(d => d.value);
-
   // Update the markers that should be hidden
   map.svg.selectAll('circle')
     .filter(d => !checkedLevels.includes(d.danger_rating_text))
