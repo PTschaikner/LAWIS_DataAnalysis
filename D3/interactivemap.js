@@ -65,6 +65,36 @@ function loadCSVData() {
 }
 
 function addHistogram(data) {
+  var rollupData = d3.rollup(
+    data,
+    // Second argument is an array of reducer functions
+    // In this case, we want to count the number of avalanches where involved_dead > 0
+    // and involved_injured > 0 for each day_of_year
+    // So, we will use filter() and length properties to get the counts
+    d => [
+      d.length,
+      d.filter(d => d.involved_dead > 0).length,
+      d.filter(d => d.involved_dead == 0 && d.involved_injured > 0).length,
+      d.filter(d => d.involved_dead == 0 && d.involved_injured == 0).length,
+    ],
+    d => d.day_of_year
+  );
+  var daywiseData = Array.from(rollupData, d => ({
+    day_of_year: d[0],
+    count_all_avalanches: d[1][0],
+    count_deadly_avalanches: d[1][1],
+    count_harmful_avalanches: d[1][2],
+    count_other_avalanches: d[1][3]
+  }));
+
+  var stackedData = d3.stack()
+    .keys(['day_of_year', 'count_deadly_avalanches', 'count_harmful_avalanches', 'count_other_avalanches'])
+    (daywiseData);
+
+
+  console.log(stackedData);
+
+
   const histogramDiv = d3.select('#histogram');
   const width = histogramDiv.node().getBoundingClientRect().width;
   const height = histogramDiv.node().getBoundingClientRect().height;
@@ -89,7 +119,7 @@ function addHistogram(data) {
 
   // Create x and y axes
   const xAxis = d3.axisBottom(xScale);
-  
+
   const yAxis = d3.axisLeft(yScale);
 
   // Add the x axis to the bottom of the chart
@@ -114,7 +144,7 @@ function addHistogram(data) {
     .attr('fill', (d, i) => i % 2 === 0 ? 'gray' : 'lightgray')
     .style('opacity', 0.1);
 
-    const monthLabels = svgHist.selectAll('text')
+  const monthLabels = svgHist.selectAll('text')
     .data(calendar)
     .enter()
     .append('text')
@@ -127,14 +157,13 @@ function addHistogram(data) {
 
   // Create a selection of circles for each avalanche
   const circles = svgHist.selectAll('circle')
-    .data(data)
+    .data(daywiseData)
     .enter()
     .append('circle')
     .attr('cx', d => xScale(d.day_of_year))
-    .attr('cy', d => yScale(d.daycount))
-    .attr('r', d => d.involved_dead > 0 ? 2.5 : d.involved_injured > 0 ? 2.5 : 2)
-    .style('fill', d => d.involved_dead > 0 ? 'red' : d.involved_injured > 0 ? 'orange' : 'gray')
-    .style('opacity', 0.5);
+    .attr('cy', d => yScale(d.count_all_avalanches))
+    .style('opacity', 0.5)
+    .attr('r', 2);
 }
 
 
