@@ -79,6 +79,8 @@ function addHistogram(data) {
     ],
     d => d.day_of_year
   );
+
+
   var daywiseData = Array.from(rollupData, d => ({
     day_of_year: d[0],
     count_all_avalanches: d[1][0],
@@ -87,18 +89,16 @@ function addHistogram(data) {
     count_other_avalanches: d[1][3]
   }));
 
-  var stackedData = d3.stack()
-    .keys(['day_of_year', 'count_deadly_avalanches', 'count_harmful_avalanches', 'count_other_avalanches'])
-    (daywiseData);
 
 
-  console.log(stackedData);
+
+  console.log(daywiseData);
 
 
   const histogramDiv = d3.select('#histogram');
   const width = histogramDiv.node().getBoundingClientRect().width;
   const height = histogramDiv.node().getBoundingClientRect().height;
-  const margin = { top: 50, right: 0, bottom: 5, left: 0 };
+  const margin = { top: 20, right: 0, bottom: 5, left: 0 };
   const chartWidth = width - margin.left - margin.right;
   const chartHeight = height - margin.top - margin.bottom;
 
@@ -133,7 +133,7 @@ function addHistogram(data) {
     .call(yAxis)
     .style('display', 'none');
 
-  const monthRects = svgHist.selectAll('rect')
+  const monthRects = svgHist.selectAll('.month-rect')
     .data(calendar)
     .enter()
     .append('rect')
@@ -144,26 +144,49 @@ function addHistogram(data) {
     .attr('fill', (d, i) => i % 2 === 0 ? 'gray' : 'lightgray')
     .style('opacity', 0.1);
 
-  const monthLabels = svgHist.selectAll('text')
-    .data(calendar)
-    .enter()
-    .append('text')
-    .attr('x', d => xScale(d.start + d.days / 2)) // position the label at the center of the month rectangle
-    .attr('y', 20) // offset the label from the top of the chart
-    .text(d => d.month)
-    .style('font-size', '16px')
-    .style("fill", "black");
-
 
   // Create a selection of circles for each avalanche
-  const circles = svgHist.selectAll('circle')
-    .data(daywiseData)
-    .enter()
-    .append('circle')
-    .attr('cx', d => xScale(d.day_of_year))
-    .attr('cy', d => yScale(d.count_all_avalanches))
-    .style('opacity', 0.5)
-    .attr('r', 2);
+  const AllEvents = svgHist.selectAll('.bar-rect-all')
+  .data(daywiseData)
+  .enter()
+  .append("rect")
+  .attr("id", d => "rect-" + d.day_of_year)
+  .attr("x", d => xScale(d.day_of_year))
+  .attr("y", chartHeight) // set the initial y value to the bottom of the chart
+  .attr("width", xScale(2) - xScale(1))
+  .attr("fill", "gray")
+  .transition()
+  .duration(2000)
+  .attr("y", d => yScale(d.count_all_avalanches)) // set the final y value to the top of the bar
+  .attr("height", d => chartHeight - yScale(d.count_all_avalanches)); // calculate the height of the bar based on the y value
+
+  const DeadlyEvents = svgHist.selectAll('.bar-rect-deadly')
+  .data(daywiseData)
+  .enter()
+  .append("rect")
+  .attr("id", d => "rect-" + d.day_of_year)
+  .attr("x", d => xScale(d.day_of_year))
+  .attr("y", chartHeight) // set the initial y value to the bottom of the chart
+  .attr("width", xScale(2) - xScale(1))
+  .attr("fill", "red")
+  .transition()
+  .duration(2000)
+  .attr("y", d => yScale(d.count_deadly_avalanches + d.count_harmful_avalanches)) // set the final y value to the top of the bar
+  .attr("height", d => chartHeight - yScale(d.count_deadly_avalanches + d.count_harmful_avalanches)); // calculate the height of the bar based on the y value
+
+  const HarmfulEvents = svgHist.selectAll('.bar-rect-harmful')
+  .data(daywiseData)
+  .enter()
+  .append("rect")
+  .attr("id", d => "rect-" + d.day_of_year)
+  .attr("x", d => xScale(d.day_of_year))
+  .attr("y", chartHeight) // set the initial y value to the bottom of the chart
+  .attr("width", xScale(2) - xScale(1))
+  .attr("fill", "orange")
+  .transition()
+  .duration(2000)
+  .attr("y", d => yScale(d.count_harmful_avalanches)) // set the final y value to the top of the bar
+  .attr("height", d => chartHeight - yScale(d.count_harmful_avalanches)); // calculate the height of the bar based on the y value
 }
 
 
