@@ -11,7 +11,7 @@ let chartWidth = null;
 let map = null;
 const zoomLevel = 9;
 const innsbruck = new L.LatLng(47.259659, 11.400375);
-const dangerLevels = ['low', 'moderate', 'considerable', 'high', 'very high', 'not assigned'];
+const dangerLevels = [];
 let fatalAvalancheGroup = null;
 let injuredAvalancheGroup = null;
 let otherAvalancheGroup = null;
@@ -149,7 +149,7 @@ function initHistogram(data) {
 async function updateHistogram() {
   const data = await d3.csv("avalanche_data.csv");
   var rollupData = d3.rollup(
-    data.filter(d => checkedLevels.includes(d.danger_rating_text)),
+    data.filter(d => checkedLevels.includes(d.danger_rating_level)),
     // Second argument is an array of reducer functions
     // In this case, we want to count the number of avalanches where involved_dead > 0
     // and involved_injured > 0 for each day_of_year
@@ -266,7 +266,7 @@ function addMarker(data) {
 
 function resetRadius(group, radiusFn) {
   group.selectAll('circle')
-    .filter(d => checkedLevels.includes(d.danger_rating_text))
+    .filter(d => checkedLevels.includes(d.danger_rating_level))
     .transition()
     .duration(500)
     .attr('r', radiusFn);
@@ -274,7 +274,7 @@ function resetRadius(group, radiusFn) {
 function updateMarkers() {
   // Update the markers that should be hidden
   map.svg.selectAll('circle')
-    .filter(d => !checkedLevels.includes(d.danger_rating_text))
+    .filter(d => !checkedLevels.includes(d.danger_rating_level))
     .transition() // Add a transition to fade out the markers
     .duration(500)
     .attr('r', 0);
