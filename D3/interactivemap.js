@@ -146,77 +146,70 @@ function initHistogram(data) {
   updateHistogram();
 }
 
-function updateHistogram() {
-  d3.csv("avalanche_data.csv").then(function (data) {
-    var rollupData = d3.rollup(
-      data.filter(d => checkedLevels.includes(d.danger_rating_text)),
-      // Second argument is an array of reducer functions
-      // In this case, we want to count the number of avalanches where involved_dead > 0
-      // and involved_injured > 0 for each day_of_year
-      // So, we will use filter() and length properties to get the counts
-      d => [
-        d.length,
-        d.filter(d => d.involved_dead > 0).length,
-        d.filter(d => d.involved_dead == 0 && d.involved_injured > 0).length,
-        d.filter(d => d.involved_dead == 0 && d.involved_injured == 0).length,
-      ],
-      d => d.day_of_year
-    );
-
-
-    var daywiseData = Array.from(rollupData, d => ({
-      day_of_year: d[0],
-      count_all_avalanches: d[1][0],
-      count_deadly_avalanches: d[1][1],
-      count_harmful_avalanches: d[1][2],
-      count_other_avalanches: d[1][3]
-    }));
+async function updateHistogram() {
+  const data = await d3.csv("avalanche_data.csv");
+  var rollupData = d3.rollup(
+    data.filter(d => checkedLevels.includes(d.danger_rating_text)),
+    // Second argument is an array of reducer functions
+    // In this case, we want to count the number of avalanches where involved_dead > 0
+    // and involved_injured > 0 for each day_of_year
+    // So, we will use filter() and length properties to get the counts
+    d => [
+      d.length,
+      d.filter(d => d.involved_dead > 0).length,
+      d.filter(d => d.involved_dead == 0 && d.involved_injured > 0).length,
+      d.filter(d => d.involved_dead == 0 && d.involved_injured == 0).length,
+    ],
+    d => d.day_of_year
+  );
 
 
 
+  var daywiseData = Array.from(rollupData, d => ({
+    day_of_year: d[0],
+    count_all_avalanches: d[1][0],
+    count_deadly_avalanches: d[1][1],
+    count_harmful_avalanches: d[1][2],
+    count_other_avalanches: d[1][3]
+  }));
+
+  daywiseData.sort((a, b) => a.day_of_year - b.day_of_year); // sort by day_of_year
+  console.log(daywiseData)
 
 
-    // Create x and y scales
-    const xScale = d3.scaleLinear()
-      .domain([1, 365])
-      .range([0, chartWidth]);
-    const yScale = d3.scaleLinear()
-      .domain([0, 70])
-      .range([chartHeight, 0]);
 
+  function createBars(selection, data, color, yAccessor, className) {
+    selection.selectAll(`.${className}`)
+      .data(data)
+      .join(
+        enter => enter.append("rect")
+          .attr("class", className)
+          .attr("x", d => xScale(d.day_of_year))
+          .attr("y", chartHeight) // set the initial y value to the bottom of the chart
+          .attr("width", xScale(2) - xScale(1))
+          .attr("fill", color)
+          .attr("data-day-of-year", d => d.day_of_year) // add a day_of_year attribute
+          .transition()
+          .duration(2000)
+          .attr("y", d => yScale(yAccessor(d))) // set the final y value to the top of the bar
+          .attr("height", d => chartHeight - yScale(yAccessor(d))), // calculate the height of the bar based on the y value
+        update => update
+          .transition()
+          .duration(2000)
+          .attr("y", d => yScale(yAccessor(d)))
+          .attr("height", d => chartHeight - yScale(yAccessor(d))),
+        exit => exit
+          .transition()
+          .duration(1000)
+          .attr("y", chartHeight)
+          .attr("height", 0)
+          .remove()
+      );
+  }
 
-      function createBars(selection, data, color, yAccessor, className) {
-        selection.selectAll(`.${className}`)
-          .data(data)
-          .join(
-            enter => enter.append("rect")
-              .attr("class", className)
-              .attr("x", d => xScale(d.day_of_year))
-              .attr("y", chartHeight) // set the initial y value to the bottom of the chart
-              .attr("width", xScale(2) - xScale(1))
-              .attr("fill", color)
-              .transition()
-              .duration(2000)
-              .attr("y", d => yScale(yAccessor(d))) // set the final y value to the top of the bar
-              .attr("height", d => chartHeight - yScale(yAccessor(d))), // calculate the height of the bar based on the y value
-            update => update
-              .transition()
-              .duration(2000)
-              .attr("y", d => yScale(yAccessor(d)))
-              .attr("height", d => chartHeight - yScale(yAccessor(d))),
-            exit => exit
-            .transition()
-            .duration(1000)
-            .attr("y", chartHeight)
-            .attr("height", 0)
-            .remove()
-          );
-      }
-
-    createBars(svgHist, daywiseData, "gray", d => d.count_all_avalanches, "allAvalanches");
-    createBars(svgHist, daywiseData, "red", d => d.count_deadly_avalanches + d.count_harmful_avalanches, "deadlyAvalanches");
-    createBars(svgHist, daywiseData, "orange", d => d.count_harmful_avalanches, "harmfulAvalanches");
-  });
+  createBars(svgHist, daywiseData, "gray", d => d.count_all_avalanches, "allAvalanches");
+  createBars(svgHist, daywiseData, "red", d => d.count_deadly_avalanches + d.count_harmful_avalanches, "deadlyAvalanches");
+  createBars(svgHist, daywiseData, "orange", d => d.count_harmful_avalanches, "harmfulAvalanches");
 }
 
 
