@@ -93,7 +93,7 @@ function loadCSVData() {
   })
 }
 
-function initHistogram(data) {
+function initHistogram() {
   histogramDiv = d3.select('#histogram');
   const width = histogramDiv.node().getBoundingClientRect().width;
   const height = histogramDiv.node().getBoundingClientRect().height;
@@ -148,6 +148,7 @@ function initHistogram(data) {
 
 async function updateHistogram() {
   const data = await d3.csv("avalanche_data.csv");
+  data.sort((a, b) => a.day_of_year - b.day_of_year); // sort by day_of_year
   var rollupData = d3.rollup(
     data.filter(d => checkedLevels.includes(d.danger_rating_level)),
     // Second argument is an array of reducer functions
@@ -174,13 +175,15 @@ async function updateHistogram() {
   }));
 
   daywiseData.sort((a, b) => a.day_of_year - b.day_of_year); // sort by day_of_year
+  console.log(data.filter(d => checkedLevels.includes(d.danger_rating_level)))
   console.log(daywiseData)
 
 
 
   function createBars(selection, data, color, yAccessor, className) {
+    //selection.selectAll(`.${className}`).remove();
     selection.selectAll(`.${className}`)
-      .data(data)
+      .data(data,  d => d.day_of_year)
       .join(
         enter => enter.append("rect")
           .attr("class", className)
@@ -190,12 +193,12 @@ async function updateHistogram() {
           .attr("fill", color)
           .attr("data-day-of-year", d => d.day_of_year) // add a day_of_year attribute
           .transition()
-          .duration(2000)
+          .duration(1500)
           .attr("y", d => yScale(yAccessor(d))) // set the final y value to the top of the bar
           .attr("height", d => chartHeight - yScale(yAccessor(d))), // calculate the height of the bar based on the y value
         update => update
           .transition()
-          .duration(2000)
+          .duration(1000)
           .attr("y", d => yScale(yAccessor(d)))
           .attr("height", d => chartHeight - yScale(yAccessor(d))),
         exit => exit
