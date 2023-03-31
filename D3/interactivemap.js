@@ -71,7 +71,7 @@ function initMap() {
     zoomControl: false, // disable zoom buttons
     scrollWheelZoom: false,
     doubleClickZoom: false,
-    
+
   };
   map = new L.Map('leaflet-map', mapOptions);
 
@@ -115,7 +115,7 @@ function initHistogram() {
     .domain([1, 365])
     .range([0, chartWidth]);
   yScale = d3.scaleLinear()
-    .domain([0, 70])
+    .domain([0, 80])
     .range([chartHeight, 0]);
 
   // Create x and y axes
@@ -158,21 +158,21 @@ function initHistogram() {
     .style('font-size', '14px')
     .style('fill', 'black');
 
-// Create a new selection for the lines
-const gridlines = svgHist.selectAll('.gridline')
-  .data(d3.range(0, 71, 20)) // bind data to the selection
-  
-// Append a line to each data point
-gridlines.enter()
-  .append('line')
-  .attr('class', 'gridline')
-  .attr('x1', 0)
-  .attr('x2', chartWidth)
-  .attr('y1', d => yScale(d))
-  .attr('y2', d => yScale(d))
-  .style('stroke', 'white')
-  .style('stroke-width', '2px')
-  .style('opacity', 0.8);
+  // Create a new selection for the lines
+  const gridlines = svgHist.selectAll('.gridline')
+    .data(d3.range(0, 71, 20)) // bind data to the selection
+
+  // Append a line to each data point
+  gridlines.enter()
+    .append('line')
+    .attr('class', 'gridline')
+    .attr('x1', 0)
+    .attr('x2', chartWidth)
+    .attr('y1', d => yScale(d))
+    .attr('y2', d => yScale(d))
+    .style('stroke', 'white')
+    .style('stroke-width', '2px')
+    .style('opacity', 0.8);
 
   updateHistogram();
 }
@@ -286,6 +286,44 @@ function addMarker(data) {
       } else {
         otherAvalancheGroup.node().appendChild(this);
       }
+    })
+    .on('mouseenter', function(d) {
+      // Get the day of the year and chart height
+      const selectedDay = d.target.__data__.day_of_year;    
+      // Calculate the x and y coordinates of the rectangle
+      const x = xScale(selectedDay);
+      const y = chartHeight - 80;
+    
+      // Create a rectangle in #histogram
+      d3.select('#histogram').append('rect')
+        .attr('class', 'tooltip')
+        .attr('x', x)
+        .attr('y', y)
+        .attr('width', xScale(2) - xScale(1))
+        .attr('height', 80)
+        .attr("fill", "black")
+        .attr("opacity", 1);
+
+
+    
+      // Reduce the opacity of other markers
+      d3.select('#histogram').selectAll(['.allAvalanches', '.deadlyAvalanches', 'harmfulAvalanches'])
+        .filter(function() {
+          return d3.select(this).attr('data-day-of-year') != selectedDay;
+        })
+        .transition()
+        .duration(500)
+        .attr('opacity', 0.3);
+    })
+    .on('mouseleave', function(d) {
+      // Remove the rectangle from #histogram
+      d3.select('#histogram').select('.tooltip').remove();
+    
+      // Restore the opacity of other markers
+      d3.select('#histogram').selectAll(['.allAvalanches', '.deadlyAvalanches', 'harmfulAvalanches'])
+        .transition()
+        .duration(200)
+        .attr('opacity', 1);
     });
 
   // set marker attributes for each Group
