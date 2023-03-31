@@ -4,10 +4,19 @@
 }
 
 #leaflet-map {
-    width: 1200px;
-    height: 600px;
-  }
+  width: 1200px;
+  height: 600px;
+}
 
-  .leaflet-container {
-    cursor: auto !important;
-  }
+.leaflet-container {
+  cursor: auto !important;
+}
+
+.month-label {
+  font-size: 14px;
+  fill: gray;
+  opacity: 0.3;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}

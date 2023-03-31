@@ -7,6 +7,7 @@ let monthRects = null;
 let chartHeight = null;
 let chartWidth = null;
 
+
 // Define initial variables and constants
 let map = null;
 const zoomLevel = 9;
@@ -69,7 +70,8 @@ function initMap() {
     touchZoom: false,  // disable touch zoom
     zoomControl: false, // disable zoom buttons
     scrollWheelZoom: false,
-    doubleClickZoom: false
+    doubleClickZoom: false,
+    
   };
   map = new L.Map('leaflet-map', mapOptions);
 
@@ -97,7 +99,7 @@ function initHistogram() {
   histogramDiv = d3.select('#histogram');
   const width = histogramDiv.node().getBoundingClientRect().width;
   const height = histogramDiv.node().getBoundingClientRect().height;
-  margin = { top: 20, right: 0, bottom: 5, left: 0 };
+  margin = { top: 20, right: 0, bottom: 10, left: 0 };
   chartWidth = width - margin.left - margin.right;
   chartHeight = height - margin.top - margin.bottom;
 
@@ -119,7 +121,7 @@ function initHistogram() {
   // Create x and y axes
   xAxis = d3.axisBottom(xScale);
 
-  yAxis = d3.axisLeft(yScale);
+  yAxis = d3.axisLeft(yScale).tickValues(d3.range(0, 70, 20));
 
   // Add the x axis to the bottom of the chart
   svgHist.append('g')
@@ -132,6 +134,7 @@ function initHistogram() {
     .call(yAxis)
     .style('display', 'none');
 
+
   monthRects = svgHist.selectAll('.month-rect')
     .data(calendar)
     .enter()
@@ -142,6 +145,34 @@ function initHistogram() {
     .attr('height', chartHeight)
     .attr('fill', (d, i) => i % 2 === 0 ? 'gray' : 'lightgray')
     .style('opacity', 0.1);
+
+  monthText = svgHist.selectAll('.month-text')
+    .data(calendar)
+    .enter()
+    .append('text')
+    .attr('class', 'month-label')  // add a class to the text elements
+    .attr('x', d => xScale(d.start) + (xScale(d.start + d.days) - xScale(d.start)) / 2)
+    .attr('y', 15)
+    .text(d => d.month)
+    .style('text-anchor', 'middle')
+    .style('font-size', '14px')
+    .style('fill', 'black');
+
+// Create a new selection for the lines
+const gridlines = svgHist.selectAll('.gridline')
+  .data(d3.range(0, 71, 20)) // bind data to the selection
+  
+// Append a line to each data point
+gridlines.enter()
+  .append('line')
+  .attr('class', 'gridline')
+  .attr('x1', 0)
+  .attr('x2', chartWidth)
+  .attr('y1', d => yScale(d))
+  .attr('y2', d => yScale(d))
+  .style('stroke', 'white')
+  .style('stroke-width', '2px')
+  .style('opacity', 0.8);
 
   updateHistogram();
 }
@@ -164,8 +195,6 @@ async function updateHistogram() {
     d => d.day_of_year
   );
 
-
-
   var daywiseData = Array.from(rollupData, d => ({
     day_of_year: d[0],
     count_all_avalanches: d[1][0],
@@ -183,7 +212,7 @@ async function updateHistogram() {
   function createBars(selection, data, color, yAccessor, className) {
     //selection.selectAll(`.${className}`).remove();
     selection.selectAll(`.${className}`)
-      .data(data,  d => d.day_of_year)
+      .data(data, d => d.day_of_year)
       .join(
         enter => enter.append("rect")
           .attr("class", className)
