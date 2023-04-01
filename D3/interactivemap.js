@@ -222,17 +222,17 @@ async function updateHistogram() {
           .attr("fill", color)
           .attr("data-day-of-year", d => d.day_of_year) // add a day_of_year attribute
           .style('z-index', 20)
-          .transition()
+          .transition("bar") // name transition to make sure it doesn't get interrupted by mouseOver events
           .duration(1500)
           .attr("y", d => yScale(yAccessor(d))) // set the final y value to the top of the bar
           .attr("height", d => chartHeight - yScale(yAccessor(d))), // calculate the height of the bar based on the y value
         update => update
-          .transition()
+          .transition("bar")
           .duration(1000)
           .attr("y", d => yScale(yAccessor(d)))
           .attr("height", d => chartHeight - yScale(yAccessor(d))),
         exit => exit
-          .transition()
+          .transition("bar")
           .duration(1000)
           .attr("y", chartHeight)
           .attr("height", 0)
