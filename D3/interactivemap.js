@@ -221,6 +221,7 @@ async function updateHistogram() {
           .attr("width", xScale(2) - xScale(1))
           .attr("fill", color)
           .attr("data-day-of-year", d => d.day_of_year) // add a day_of_year attribute
+          .style('z-index', 20)
           .transition()
           .duration(1500)
           .attr("y", d => yScale(yAccessor(d))) // set the final y value to the top of the bar
@@ -287,38 +288,47 @@ function addMarker(data) {
         otherAvalancheGroup.node().appendChild(this);
       }
     })
-    .on('mouseenter', function(d) {
+    .on('mouseenter', function (d) {
       // Get the day of the year and chart height
-      const selectedDay = d.target.__data__.day_of_year;    
+      const selectedDay = d.target.__data__.day_of_year;
       // Calculate the x and y coordinates of the rectangle
       const x = xScale(selectedDay);
-      const y = chartHeight - 80;
-    
+      // Get the width and height of the matching .allAvalanches rectangle
+      const matchingRect = d3.selectAll('.allAvalanches')
+        .filter(function () {
+          return d3.select(this).attr('data-day-of-year') == selectedDay;
+        })
+        .node();
+      const rectWidth = matchingRect.width.baseVal.value;
+      const rectHeight = matchingRect.height.baseVal.value;
+      const y = chartHeight - rectHeight;
+
       // Create a rectangle in #histogram
-      d3.select('#histogram').append('rect')
+      svgHist.append('rect')
         .attr('class', 'tooltip')
         .attr('x', x)
         .attr('y', y)
         .attr('width', xScale(2) - xScale(1))
-        .attr('height', 80)
-        .attr("fill", "black")
-        .attr("opacity", 1);
+        .attr('height', rectHeight)
+        .attr('fill', 'none')
+        .attr('stroke', 'black')
+        .attr('stroke-width', 1.5)
+        .attr('opacity', 0.4);
 
 
-    
       // Reduce the opacity of other markers
       d3.select('#histogram').selectAll(['.allAvalanches', '.deadlyAvalanches', 'harmfulAvalanches'])
-        .filter(function() {
+        .filter(function () {
           return d3.select(this).attr('data-day-of-year') != selectedDay;
         })
         .transition()
         .duration(500)
         .attr('opacity', 0.3);
     })
-    .on('mouseleave', function(d) {
+    .on('mouseleave', function (d) {
       // Remove the rectangle from #histogram
       d3.select('#histogram').select('.tooltip').remove();
-    
+
       // Restore the opacity of other markers
       d3.select('#histogram').selectAll(['.allAvalanches', '.deadlyAvalanches', 'harmfulAvalanches'])
         .transition()
