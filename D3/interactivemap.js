@@ -243,6 +243,35 @@ async function updateHistogram() {
   createBars(svgHist, daywiseData, "gray", d => d.count_all_avalanches, "allAvalanches");
   createBars(svgHist, daywiseData, "red", d => d.count_deadly_avalanches + d.count_harmful_avalanches, "deadlyAvalanches");
   createBars(svgHist, daywiseData, "orange", d => d.count_harmful_avalanches, "harmfulAvalanches");
+  svgHist.selectAll(['.allAvalanches', '.deadlyAvalanches', '.harmfulAvalanches'])
+    .on("mouseover", function (d) {
+      // get the day of the year of the selected bar
+      const selectedDay = d.target.__data__.day_of_year;
+      console.log(selectedDay)
+      // select all circles where the circle-day-of-year does not match the selected day
+      d3.selectAll("circle")
+        .filter(function () {
+          return d3.select(this).attr("circle-day-of-year") != selectedDay;
+        })
+        // reduce their opacity to 0.2
+        .attr("opacity", 0.2);
+
+      d3.selectAll("circle")
+        .filter(function () {
+          return d3.select(this).attr("circle-day-of-year") === selectedDay;
+        })
+        // reduce their opacity to 0.2
+        .attr("opacity", 0.9)
+        .attr("stroke", "black")
+        .attr("stroke-width", 2);
+    })
+    .on("mouseout", function (d) {
+      // reset the opacity of all circles
+      d3.selectAll("circle")
+        .attr("opacity", 0.5)
+        .attr("stroke-width", 0);
+    });
+
 }
 
 
@@ -279,6 +308,7 @@ function addMarker(data) {
     .append('circle')
     .attr('cx', function (d) { return map.latLngToLayerPoint([d.location_latitude, d.location_longitude]).x; })
     .attr('cy', function (d) { return map.latLngToLayerPoint([d.location_latitude, d.location_longitude]).y; })
+    .attr("circle-day-of-year", d => d.day_of_year)
     .each(function (d) {
       if (d.involved_dead > 0) {
         fatalAvalancheGroup.node().appendChild(this);
