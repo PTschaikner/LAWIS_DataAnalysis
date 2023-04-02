@@ -339,7 +339,7 @@ function addMarker(data) {
         .attr('x', x)
         .attr('y', y)
         .attr('width', xScale(2) - xScale(1))
-        .attr('height', rectHeight)
+        .attr('height', rectHeight -1,5)
         .attr('fill', 'none')
         .attr('stroke', 'black')
         .attr('stroke-width', 1.5)
