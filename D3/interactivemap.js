@@ -10,7 +10,7 @@ let chartWidth = null;
 
 // Define initial variables and constants
 let map = null;
-const zoomLevel = 9;
+var zoomLevel = 9;
 const innsbruck = new L.LatLng(47.259659, 11.400375);
 const dangerLevels = [];
 let fatalAvalancheGroup = null;
@@ -57,6 +57,7 @@ function showMap() {
       updateHistogram();
     });
   });
+
 }
 
 // Initialize the map
@@ -66,18 +67,22 @@ function initMap() {
     center: innsbruck,
     zoom: zoomLevel,
     layers: [tileLayer],
-    dragging: false,   // disable map dragging
+    dragging: true,   // disable map dragging
     touchZoom: false,  // disable touch zoom
-    zoomControl: false, // disable zoom buttons
+    zoomControl: true, // disable zoom buttons
     scrollWheelZoom: false,
     doubleClickZoom: false,
-
   };
   map = new L.Map('leaflet-map', mapOptions);
 
   // Add SVG layer to map for d3 markers
   map._initPathRoot();
   map.svg = d3.select('#leaflet-map').select('svg');
+
+  // Listen to the zoomend event on the map
+  map.on('zoomend', function () {
+    updateZoom();
+  });
 }
 
 function createTileLayer() {
@@ -339,7 +344,7 @@ function addMarker(data) {
         .attr('x', x)
         .attr('y', y)
         .attr('width', xScale(2) - xScale(1))
-        .attr('height', rectHeight -1,5)
+        .attr('height', rectHeight - 1, 5)
         .attr('fill', 'none')
         .attr('stroke', 'black')
         .attr('stroke-width', 1.5)
@@ -364,6 +369,7 @@ function addMarker(data) {
         .transition()
         .duration(200)
         .attr('opacity', 1);
+
     });
 
   // set marker attributes for each Group
@@ -394,3 +400,18 @@ function updateMarkers() {
   resetRadius(injuredAvalancheGroup, injuredRadius);
   resetRadius(otherAvalancheGroup, otherRadius);
 }
+
+
+
+function updateZoom() {
+  const circles = map.svg.selectAll('circle')
+    .nodes();
+  const currentCx = circles.map(circle => circle.cx.baseVal.value);
+  const currentCy = circles.map(circle => circle.cy.baseVal.value);
+
+  // Update the positions of all the existing circles
+  map.svg.selectAll('circle')
+    .attr("cx", (d, i) => map.latLngToLayerPoint([d.lon, d.lat]).x)
+    .attr("cy", (d, i) => map.latLngToLayerPoint([d.lon, d.lat]).y);
+}
+
