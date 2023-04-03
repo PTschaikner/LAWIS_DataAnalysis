@@ -1,3 +1,66 @@
+html {
+  font-size: 12px;
+}
+
+body {
+  font-family: 'Open Sans', sans-serif;
+  width: 87.5%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 12.5%;
+  max-width: 1400px;
+}
+
+article {
+  padding: 5rem 0rem;
+}
+
+section {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+
+
+h1,
+h2,
+h3 {
+  font-family: 'Merriweather', serif;
+  color: #1d3d63;
+  font-weight: 400;
+  margin-top: 4rem;
+  margin-bottom: 1.5rem;
+  font-size: 3.2rem;
+  line-height: 1;
+}
+
+p,
+dl,
+ol,
+ul {
+    font-size: 1.4rem;
+    line-height: 2rem;
+}
+
+p,
+dl,
+ol,
+ul {
+    font-size: 1.4rem;
+    line-height: 2rem;
+}
+
+p {
+    margin-top: 1.4rem;
+    margin-bottom: 1.4rem;
+    padding-right: 0;
+    vertical-align: baseline;
+}
+
+section > p {
+  width: 55%;
+}
+
 #histogram {
   width: 1200px;
   height: 200px;
@@ -36,16 +99,19 @@
   justify-content: flex-start;
 }
 
-label > div {
+label>div {
   display: flex;
   align-items: center;
-  justify-content: flex-start; /* align content to the left */
+  justify-content: flex-start;
+  /* align content to the left */
 }
 
-label > div img {
-  margin-right: 0.5em; /* add margin between icon and text */
+label>div img {
+  margin-right: 0.5em;
+  /* add margin between icon and text */
 }
 
-label > div input[type="checkbox"] {
-  margin-left: 0.5em; /* add margin between text and checkbox */
+label>div input[type="checkbox"] {
+  margin-left: 0.5em;
+  /* add margin between text and checkbox */
 }
