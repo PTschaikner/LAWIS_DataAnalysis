@@ -61,13 +61,47 @@ section > p {
   width: 55%;
 }
 
+figure {
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+  max-width: 55%;
+  -webkit-margin-start: 0;
+  -webkit-margin-end: 0;
+  margin: 0 0 3em 0;
+}
+
+figcaption {
+  float: right;
+  clear: right;
+  margin-top: 0;
+  margin-bottom: 0;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  vertical-align: baseline;
+  position: relative;
+  max-width: 40%;
+}
+
+figure.fullwidth figcaption {
+  margin-right: 24%;
+}
+
+.fullwidth {
+  max-width: 90%;
+  clear:both;
+}
+
+
 #histogram {
-  width: 1200px;
+
   height: 200px;
 }
 
 #leaflet-map {
-  width: 1200px;
+
   height: 600px;
 }
 
@@ -90,28 +124,29 @@ section > p {
   object-fit: contain;
   margin-right: 8px;
   margin-top: 8px;
-  margin-bottom: 8px;
 }
 
 #checkboxes label {
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  flex-wrap: wrap; /* allow items to wrap to the next line */
 }
 
-label>div {
+label > div {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  /* align content to the left */
+  margin-right: 10px; /* add margin between items */
+  flex-direction: row; /* arrange items in a row */
 }
 
-label>div img {
+label > div img {
   margin-right: 0.5em;
   /* add margin between icon and text */
 }
 
-label>div input[type="checkbox"] {
+label > div input[type="checkbox"] {
   margin-left: 0.5em;
   /* add margin between text and checkbox */
 }
