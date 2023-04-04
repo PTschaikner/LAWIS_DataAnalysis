@@ -397,12 +397,17 @@ function addMarker(data) {
 }
 
 
-function resetRadius(group, radiusFn) {
-  group.selectAll('circle')
-    .filter(d => checkedLevels.includes(d.danger_rating_level))
-    .transition()
-    .duration(500)
-    .attr('r', radiusFn);
+function resetRadius(group, radiusFn, withTransition = true) {
+  const selection = group.selectAll('circle')
+    .filter(d => checkedLevels.includes(d.danger_rating_level));
+
+  if (withTransition) {
+    selection.transition()
+      .duration(500)
+      .attr('r', radiusFn);
+  } else {
+    selection.attr('r', radiusFn);
+  }
 }
 function updateMarkers() {
   // Update the markers that should be hidden
@@ -436,7 +441,7 @@ function updateZoom() {
       return map.latLngToLayerPoint([lat, lng]).y;
     });
       // Update the markers that should be shown
-  resetRadius(fatalAvalancheGroup, fatalRadius);
-  resetRadius(injuredAvalancheGroup, injuredRadius);
-  resetRadius(otherAvalancheGroup, otherRadius);
+  resetRadius(fatalAvalancheGroup, fatalRadius, false);
+  resetRadius(injuredAvalancheGroup, injuredRadius, false);
+  resetRadius(otherAvalancheGroup, otherRadius, false);
 }
