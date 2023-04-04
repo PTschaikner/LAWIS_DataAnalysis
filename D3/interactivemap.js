@@ -68,7 +68,7 @@ function initMap() {
     zoom: zoomLevel,
     layers: [tileLayer],
     dragging: true,   // disable map dragging
-    touchZoom: false,  // disable touch zoom
+    touchZoom: true,  // disable touch zoom
     zoomControl: true, // disable zoom buttons
     scrollWheelZoom: false,
     doubleClickZoom: false,
@@ -293,9 +293,9 @@ function setMarkerAttributes(group, fill, opacity, radiusFn) {
     .attr('r', radiusFn);
 }
 
-function fatalRadius(d) { return 1 + d.involved_dead * 1.2 };
-function injuredRadius(d) { return 1 + d.involved_injured * 1.2 };
-function otherRadius(d) { return 1.5 };
+function fatalRadius(d) { return 2 + d.involved_dead * 1};
+function injuredRadius(d) { return 2 + d.involved_injured *1};
+function otherRadius(d) { return 2 };
 
 
 // Add the markers to the map
