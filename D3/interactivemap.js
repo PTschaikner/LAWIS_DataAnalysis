@@ -165,7 +165,14 @@ function initHistogram() {
     .attr('class', 'month-label')  // add a class to the text elements
     .attr('x', d => xScale(d.start) + (xScale(d.start + d.days) - xScale(d.start)) / 2)
     .attr('y', 15)
-    .text(d => d.month)
+    .text(d => {
+      if (chartWidth < 900) {
+        // Use the first three letters of the month name
+        return d.month.substring(0, 3);
+      } else {
+        return d.month;
+      }
+    })
     .style('text-anchor', 'middle')
     .style('font-size', '14px')
     .style('fill', 'black');
@@ -188,6 +195,7 @@ function initHistogram() {
 
   updateHistogram();
 }
+
 
 async function updateHistogram() {
   const data = await d3.csv("avalanche_data.csv");

@@ -97,12 +97,11 @@ figure.fullwidth figcaption {
 
 #histogram {
 
-  height: 200px;
+  height: 150px;
 }
 
 #leaflet-map {
-
-  height: 600px;
+  height: 400px;
 }
 
 .leaflet-container {
@@ -110,12 +109,9 @@ figure.fullwidth figcaption {
 }
 
 .month-label {
-  font-size: 14px;
   fill: gray;
   opacity: 0.3;
-  font-weight: bold;
-  text-transform: uppercase;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: 'Open Sans', sans-serif;
 }
 
 .icon {
