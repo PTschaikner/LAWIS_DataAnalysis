@@ -7,10 +7,15 @@ let monthRects = null;
 let chartHeight = null;
 let chartWidth = null;
 
+const radiusScale = d3.scaleLinear()
+  .domain([3, 8, 15])
+  .range([1, 2, 10])
+  .clamp(true);
+
 
 // Define initial variables and constants
 let map = null;
-var zoomLevel = 9;
+var zoomLevel = 8;
 const innsbruck = new L.LatLng(47.259659, 11.400375);
 const dangerLevels = [];
 let fatalAvalancheGroup = null;
@@ -70,8 +75,10 @@ function initMap() {
     dragging: true,   // disable map dragging
     touchZoom: true,  // disable touch zoom
     zoomControl: true, // disable zoom buttons
-    scrollWheelZoom: false,
+    scrollWheelZoom: true,
     doubleClickZoom: false,
+    minZoom: 3,
+    maxZoom: 15
   };
   map = new L.Map('leaflet-map', mapOptions);
 
@@ -293,9 +300,17 @@ function setMarkerAttributes(group, fill, opacity, radiusFn) {
     .attr('r', radiusFn);
 }
 
-function fatalRadius(d) { return 2 + d.involved_dead * 1};
-function injuredRadius(d) { return 2 + d.involved_injured *1};
-function otherRadius(d) { return 2 };
+function fatalRadius(d) {
+  const zoomRadius = radiusScale(map.getZoom());
+  const radiusFactor = 0.4; // Change this value to set the percentage increase
+  return zoomRadius + (d.involved_dead * radiusFactor* zoomRadius);
+}
+function injuredRadius(d) { 
+  const zoomRadius = radiusScale(map.getZoom());
+  const radiusFactor = 0.4; // Change this value to set the percentage increase
+  return zoomRadius + (d.involved_injured * radiusFactor* zoomRadius);
+}
+function otherRadius(d) { return radiusScale(map.getZoom()) };
 
 
 // Add the markers to the map
@@ -377,7 +392,7 @@ function addMarker(data) {
   // set marker attributes for each Group
   setMarkerAttributes(fatalAvalancheGroup, 'red', 0.5, 0);
   setMarkerAttributes(injuredAvalancheGroup, 'orange', 0.5, 0);
-  setMarkerAttributes(otherAvalancheGroup, 'gray', 0.6, 0);
+  setMarkerAttributes(otherAvalancheGroup, 'gray', 0.5, 0);
   updateMarkers();
 }
 
@@ -420,4 +435,8 @@ function updateZoom() {
       const lat = d.location_latitude;
       return map.latLngToLayerPoint([lat, lng]).y;
     });
+      // Update the markers that should be shown
+  resetRadius(fatalAvalancheGroup, fatalRadius);
+  resetRadius(injuredAvalancheGroup, injuredRadius);
+  resetRadius(otherAvalancheGroup, otherRadius);
 }
