@@ -349,6 +349,13 @@ function addMarker(data) {
       }
     })
     .on('mouseenter', function (d) {
+
+        // Add a stroke to the circle
+        d3.select(this)
+          .style('stroke', 'black')
+          .style('stroke-width', 2)
+          .style('opacity', 1);
+
       // Get the day of the year and chart height
       const selectedDay = d.target.__data__.day_of_year;
       // Calculate the x and y coordinates of the rectangle
@@ -386,6 +393,10 @@ function addMarker(data) {
         .attr('opacity', 0.3);
     })
     .on('mouseleave', function (d) {
+      d3.select(this)
+      .style('stroke', 'none')
+      .style('opacity', 0.5);
+
       // Remove the rectangle from #histogram
       d3.select('#histogram').select('.tooltip').remove();
 
