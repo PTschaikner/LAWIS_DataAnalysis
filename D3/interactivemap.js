@@ -314,6 +314,8 @@ function addMarker(data) {
     .attr('cx', function (d) { return map.latLngToLayerPoint([d.location_latitude, d.location_longitude]).x; })
     .attr('cy', function (d) { return map.latLngToLayerPoint([d.location_latitude, d.location_longitude]).y; })
     .attr("circle-day-of-year", d => d.day_of_year)
+    .attr("location_longitude", d => d.location_longitude)
+    .attr("location_latitude", d => d.location_latitude)
     .each(function (d) {
       if (d.involved_dead > 0) {
         fatalAvalancheGroup.node().appendChild(this);
@@ -404,14 +406,18 @@ function updateMarkers() {
 
 
 function updateZoom() {
-  const circles = map.svg.selectAll('circle')
-    .nodes();
-  const currentCx = circles.map(circle => circle.cx.baseVal.value);
-  const currentCy = circles.map(circle => circle.cy.baseVal.value);
+  const circles = map.svg.selectAll('circle').nodes();
 
   // Update the positions of all the existing circles
   map.svg.selectAll('circle')
-    .attr("cx", (d, i) => map.latLngToLayerPoint([d.lon, d.lat]).x)
-    .attr("cy", (d, i) => map.latLngToLayerPoint([d.lon, d.lat]).y);
+    .attr("cx", function (d, i) {
+      const lng = d.location_longitude;
+      const lat = d.location_latitude;
+      return map.latLngToLayerPoint([lat, lng]).x;
+    })
+    .attr("cy", function (d, i) {
+      const lng = d.location_longitude;
+      const lat = d.location_latitude;
+      return map.latLngToLayerPoint([lat, lng]).y;
+    });
 }
-
